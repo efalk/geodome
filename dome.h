@@ -46,7 +46,7 @@ extern const float white[4];
 extern const float lgrey[4];
 extern const float lgreya[4];
 
-
+extern	float	radius;
 extern	int	picking;
 extern	int	show_verts;
 extern	int	show_edges;

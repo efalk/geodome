@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$" ;
+	"$Id: dome_file.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
 #endif
 
 /**********
@@ -49,6 +49,7 @@ write_dome(Dome *dome, FILE *ofile)
 	if( ofile == NULL )
 	  return;
 
+	fprintf(ofile, "radius: %g\n", radius);
 	fprintf(ofile, "%d vertices:\n", dome->nvert);
 	for(i=0; i < dome->nvert; ++i)
 	  fprintf(ofile, "%3d: %.4g,%.4g,%.4g\n",
@@ -81,6 +82,7 @@ read_dome(Dome *dome, FILE *ifile)
 	char	name[80];
 
 	clear_dome(dome);
+	fscanf(ifile, "radius: %g\n", &radius);
 	fscanf(ifile, "%d vertices:\n", &dome->nvert);
 	dome->vertices = malloc(dome->nvert * sizeof(*dome->vertices));
 	for(i=0; i < dome->nvert; ++i)

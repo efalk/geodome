@@ -1,4 +1,4 @@
-	$Id$
+	$Id: INSTRUCTIONS,v 1.1 2004/11/12 07:18:20 efalk Exp $
 
 Overview:
 
@@ -200,7 +200,10 @@ Data File Format:
 
   The dome data file format is quite simple.
 
-  The first section is the vertex list, with the +Z direction being "up"
+  The first line lists the radius of the dome.
+
+  After that, the first section is the vertex list, with the +Z direction
+  being "up"
 
   The second section is the edge list.  Each entry consists of indices
   into the vertex list, the length, and the name of the edge if it's
