@@ -1,0 +1,13 @@
+Begin4
+Title:          geodome
+Version:        1.0
+Entered-date:   2004-11-13
+Description:    Geodesic dome design software
+Keywords:       Applications/Engineering OpenGL 3D Studio X11 Linux
+Author:         efalk@sourceforge.net (Edward Falk)
+Maintained-by:  efalk@sourceforge.net (Edward Falk)
+Primary-site:   geodome.sourceforge.net
+                29kb geodome-1.0.tar.gz
+Platforms:      OpenGL
+Copying-policy: MIT
+End
