@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_3ds.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
+	"$Id: dome_3ds.c,v 1.2 2004/11/12 08:05:47 efalk Exp $" ;
 #endif
 
 /**********
@@ -70,7 +70,7 @@ static const char usage[] =
 
 #define	EYE_HGT		5.5		/* assuming feet here */
 
-	double	radius = 12.;
+	float	radius = 12.;
 
 static	int	cameras = 0;
 static	int	ground = 0;

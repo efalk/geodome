@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$" ;
+	"$Id: dome_struts.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
 #endif
 
 /**********
@@ -51,6 +51,7 @@ static const char usage[] =
 #include "utils.h"
 #include "dome.h"
 
+	float	radius;
 
 static	double	margin = .75/12.;
 static	double	bl = .75/12.;

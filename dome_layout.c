@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$" ;
+	"$Id: dome_layout.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
 #endif
 
 /**********
@@ -57,6 +57,7 @@ static const char usage[] =
 #include "utils.h"
 #include "dome.h"
 
+	float	radius;
 
 static	float	at = 2.;
 static	float	lt = .001;
@@ -73,7 +74,6 @@ static	char	*ofilename = NULL;
 static	FILE	*ofile;
 
 
-static	float	radius;
 static	char	c0;
 static	float	xmin, ymin, xmax, ymax;
 
