@@ -1,6 +1,8 @@
 #ifndef	DOME_H
 #define	DOME_H
 
+/* $Id$ */
+
 #define	EDGE_BASE	5000
 #define	VTX_BASE	10000
 

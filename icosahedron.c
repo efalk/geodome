@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /* Compute the coordinates of a unit icosahedron.  This is a little
  * difficult to follow without a diagram, but see
  * http://www.vb-helper.com/tutorial_platonic_solids.html

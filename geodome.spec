@@ -1,3 +1,5 @@
+# $Id$
+
 %define	ver	1.0
 %define	RELEASE	1
 %define rel     %{?CUSTOM_RELEASE} %{!?CUSTOM_RELEASE:%RELEASE}

@@ -1,6 +1,8 @@
 #ifndef	UTILS_H
 #define	UTILS_H
 
+/* $Id$ */
+
 typedef	struct {float x,y,z;} Point;
 
 
