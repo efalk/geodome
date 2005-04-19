@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$" ;
+	"$Id: dome_math.c,v 1.1 2004/11/12 07:13:22 efalk Rel $" ;
 #endif
 
 /**********
@@ -243,6 +243,7 @@ tesselate(const Dome *in, Dome *out, int f)
 	int	nv, ne, nf;
 	int	fcount = 0, vcount = 0, ecount = 0;
 	int	i;
+	Edge	*edge;
 
 	/* New # faces is old # faces * f² */
 	nf = in->nface * f * f;
@@ -260,8 +261,9 @@ tesselate(const Dome *in, Dome *out, int f)
 	out->nvert = nv;
 	out->faces = malloc(nf * sizeof(*out->faces));
 	out->nface = nf;
-	out->edges = malloc(ne * sizeof(*out->edges));
+	out->edges = edge = malloc(ne * sizeof(*out->edges));
 	out->nedge = ne;
+	for(i = ne; --i >= 0; edge++->name = NULL);
 
 	/* I'm too lazy to find a proper way to populate the data
 	 * structures with the vertices in edges in any kind of
