@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$";
+	"$Id: main.c,v 1.1 2004/11/12 07:13:22 efalk Rel $";
 #endif
 
 /**********
@@ -183,6 +183,10 @@ main(int argc, char *argv[])
 	{
 	  delete_dome(&cdome);
 	  read_dome(&cdome, ifile);
+	  /* TODO: calling edge_lengths will override the lengths
+	   * in the file; this may be undesirable
+	   */
+	  edge_lengths(&cdome);
 	  render_dome(&cdome);
 	  fclose(ifile);
 	}
@@ -466,7 +470,10 @@ menuCB(int value)
 	    break;
 	  case PRINT:
 	    {
-	      write_dome(&cdome, fopen("dome.data", "w"));
+	      FILE *ofile;
+	      edge_lengths(&cdome);
+	      write_dome(&cdome, (ofile = fopen("dome.data", "w")));
+	      fclose(ofile);
 	    }
 	    break;
 	  case READ:
@@ -725,7 +732,7 @@ drag(int x, int y)
 	{
 	  char buffer[20];
 	  Point *vtx = &cdome.vertices[target_vertex];
-	  vtx->z = old_value + .02 * (my - y);
+	  vtx->z = old_value + .01 * (my - y);
 	  sprintf(buffer, "hgt = %.2f", vtx->z - ymin);
 	  glutSetWindowTitle(buffer);
 

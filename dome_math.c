@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_math.c,v 1.1 2004/11/12 07:13:22 efalk Rel $" ;
+	"$Id: dome_math.c,v 1.2 2005/04/19 18:45:58 efalk Exp $" ;
 #endif
 
 /**********
@@ -1206,3 +1206,47 @@ strutsort(const void *aa, const void *bb)
 	/* Then by length */
 	return b->len > a->len ? 1 : -1;
 }
+
+
+#ifdef	DEBUG
+void
+compare_domes(const char *file, int line, Dome *old, Dome *new)
+{
+	int	i;
+	Point	*ov, *nv;
+	Edge	*oe, *ne;
+
+	if( old->nvert != new->nvert ) {
+	  printf("old: %d vertices, new: %d vertices\n",
+	    old->nvert, new->nvert);
+	  return;
+	}
+
+	if( old->nedge != new->nedge ) {
+	  printf("old: %d edges, new: %d edges\n",
+	    old->nedge, new->nedge);
+	  return;
+	}
+
+	ov = old->vertices;
+	nv = new->vertices;
+	for(i=0; i < old->nvert; ++i) {
+	  if( nv->x != ov->x || nv->y != ov->y || nv->z != ov->z ) {
+	    printf("vtx %2d: (%g,%g,%g) => (%g,%g,%g)\n",
+	      i, ov->x, ov->y, ov->z, nv->x, nv->y, nv->z);
+	  }
+	  ++nv;
+	  ++ov;
+	}
+
+	oe = old->edges;
+	ne = new->edges;
+	for(i=0; i < old->nedge; ++i, ++oe, ++ne) {
+	  if( ne->v0 != oe->v0 || ne->v1 != oe->v1 )
+	    printf("edge %3d: %d-%d => %d-%d\n",
+	      i, oe->v0, oe->v1, ne->v0, ne->v1);
+	  if( ne->len != oe->len )
+	    printf("edge %3d: %g => %g\n", i, oe->len, ne->len);
+	}
+}
+#endif	/* DEBUG */
