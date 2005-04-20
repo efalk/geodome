@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_struts.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
+	"$Id: dome_struts.c,v 1.2 2004/11/12 08:08:02 efalk Rel $" ;
 #endif
 
 /**********
@@ -124,7 +124,7 @@ main(int argc, char **argv)
 	for(i=0, sp = struts; i < ns; ++i, ++sp)
 	{
 	  l2 = sp->len + bend_allowances(sp);
-	  fprintf(ofile, "%5s  %5d  %7.3f  %2.0f  %2.0f  %7.3f  %7.3f\n",
+	  fprintf(ofile, "%5s  %5d  %7.3f %3.0f %3.0f  %7.3f  %7.3f\n",
 	    sp->name, sp->count, sp->len * scale,
 	    sp->a0, sp->a1, l2 * scale, (l2 + 2*margin) * scale);
 	}
