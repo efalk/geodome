@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$";
+	"$Id: 3ds_utils.c,v 1.1 2004/11/12 07:13:22 efalk Exp $";
 #endif
 
 
@@ -8,24 +8,22 @@ static const char rcsid[] =
  * A few functions to make life easier when working with lib3ds.
  */
 
-#ifdef	COMMENT
-#include <lib3ds/mesh.h>
-#include <lib3ds/material.h>
-#include <lib3ds/light.h>
-#include <lib3ds/node.h>
-#include <lib3ds/matrix.h>
-#endif	/* COMMENT */
-
 #include <string.h>
+#include <math.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/mesh.h>
+#include <lib3ds/material.h>
 #include <lib3ds/vector.h>
 #include <lib3ds/camera.h>
 #include <lib3ds/quat.h>
 
 #include "3ds_utils.h"
 
+static Lib3dsMesh *full_rotation(Lib3dsMesh *, Point *, int,
+	int, const char *);
+static Lib3dsMesh *partial_rotation(Lib3dsMesh *, Point *, int,
+	double, double, int, const char *);
 
 
 /**
@@ -177,4 +175,203 @@ create_camera(Lib3dsFile *file, Lib3dsVector position, Lib3dsVector target,
 	camera->far_range = far_range;
 	camera->fov = fov;
 	lib3ds_file_insert_camera(file, camera);
+}
+
+
+
+/**
+ * Generate a surface of rotation.  This is created by taking the specified
+ * profile and rotating it about the Z axis.
+ *
+ * \param profile  Profile points.  x,z coordinates are significant, y ignored
+ * \param nprofile Number of profile points
+ * \param astart   start angle, degrees
+ * \param astop    stop angle, degrees
+ * \param nstep    number of steps of rotation
+ * \param material material name
+ *
+ * \returns Generated mesh
+ */
+
+Lib3dsMesh *
+surface_of_rotation(Point *profile, int nprofile, const char *name,
+  double astart, double astop, int nstep, const char *material)
+{
+	Lib3dsMesh	*mesh;
+	Lib3dsPoint	*points;
+	Lib3dsFace	*faces;
+	int		i, j;
+	double		x, y, z;
+	double		r, a;
+
+	/* TODO: texture mapping */
+
+	if( (mesh = lib3ds_mesh_new(name)) == NULL )
+	  return NULL;
+
+	if( astart == 0. && astop == 360. )
+	  return full_rotation(mesh, profile, nprofile, nstep, material);
+	else
+	  return partial_rotation(mesh, profile, nprofile,
+	  		astart, astop, nstep, material);
+
+#ifdef	COMMENT
+	if( !lib3ds_mesh_new_point_list(mesh, nprofile * (nstep+1)) )
+	  return NULL;
+
+	if( !lib3ds_mesh_new_face_list(mesh, nprofile * nstep * 2) )
+	  return NULL;
+
+	points = mesh->pointL;
+
+	for(i=0; i < nprofile; ++i) {
+	  r = profile->x;
+	  a = astart;
+	  z = profile->z;
+	  for(j=0; j <= nstep; ++j) {
+	    x = cos(a*M_PI/180.) * r;
+	    y = sin(a*M_PI/180.) * r;
+	    points->pos[0] = x; points->pos[1] = y; points->pos[2] = z;
+	    ++points;
+	    a += astep;
+	  }
+	  ++profile;
+	}
+
+	faces = mesh->faceL;
+	for(i=0; i < nprofile; ++i)
+	{
+	  for(j=0; j < nstep; ++j) {
+	    strncpy(faces->material, material->name, sizeof(faces->material));
+	    faces->points[0] = i*(nstep+1) + j;
+	    faces->points[1] = (i+1)*(nstep+1) + j;
+	    faces->points[2] = i*(nstep+1) + j + 1;
+	    faces->flags = 0x7;
+	    faces->smoothing = 1;
+	    ++faces;
+	    strncpy(faces->material, material->name, sizeof(faces->material));
+	    faces->points[0] = (i+1)*(nstep+1) + j;
+	    faces->points[1] = (i+1)*(nstep+1) + j + 1;
+	    faces->points[2] = i*(nstep+1) + j + 1;
+	    faces->flags = 0x7;
+	    faces->smoothing = 1;
+	    ++faces;
+	  }
+	}
+
+	return mesh;
+#endif	/* COMMENT */
+}
+
+
+static Lib3dsMesh *
+partial_rotation(Lib3dsMesh *mesh, Point *profile, int nprofile,
+	double astart, double astop, int nstep, const char *material)
+{
+	Lib3dsPoint	*points;
+	Lib3dsFace	*faces;
+	int		i, j, idx;
+	int		np;
+	double		r, angle, da;
+	double		x, y, z;
+
+	lib3ds_mesh_new_point_list(mesh, nprofile * (nstep+1));
+	points = mesh->pointL;
+
+	da = (astart - astop)/nstep;
+	np = nstep + 1;
+
+	idx = 0;
+	for(i=0; i < nprofile; ++i) {
+	  angle = astart;
+	  r = profile[i].x;
+	  z = profile[i].z;
+	  for(j=0; j < np; ++j) {
+	    points[idx].pos[0] = r * cos(angle*M_PI/180.);
+	    points[idx].pos[1] = r * sin(angle*M_PI/180.);
+	    points[idx].pos[2] = z;
+	    ++idx;
+	    angle += da;
+	  }
+	}
+
+
+	lib3ds_mesh_new_face_list(mesh, (nprofile-1) * nstep * 2);
+	faces = mesh->faceL;
+
+	idx = 0;
+	for(i=0; i < nprofile-1; ++i) {
+	  for(j=0; j < nstep; ++j) {
+	    strncpy(faces[idx].material, material, sizeof(faces[idx].material));
+	    faces[idx].points[0] = i * np + j;
+	    faces[idx].points[1] = i * np + j + 1;
+	    faces[idx].points[2] = (i+1) * np + j;
+	    faces[idx].smoothing = 1;
+	    ++idx;
+	    strncpy(faces[idx].material, material, sizeof(faces[idx].material));
+	    faces[idx].points[0] = i * np + j + 1;
+	    faces[idx].points[1] = (i+1) * np + j + 1;
+	    faces[idx].points[2] = (i+1) * np + j;
+	    faces[idx].smoothing = 1;
+	    ++idx;
+	  }
+	}
+
+	return mesh;
+}
+
+
+static Lib3dsMesh *
+full_rotation(Lib3dsMesh *mesh, Point *profile, int nprofile,
+	int nstep, const char *material)
+{
+	Lib3dsPoint	*points;
+	Lib3dsFace	*faces;
+	int		i, j, idx;
+	int		np;
+	double		r, angle, da;
+	double		x, y, z;
+
+	lib3ds_mesh_new_point_list(mesh, nprofile * nstep);
+	points = mesh->pointL;
+
+	angle = 0.;
+	da = 360./nstep;
+
+	idx = 0;
+	for(i=0; i < nprofile; ++i) {
+	  r = profile[i].x;
+	  z = profile[i].z;
+	  for(j=0; j < nstep; ++j) {
+	    points[idx].pos[0] = r * cos(angle*M_PI/180.);
+	    points[idx].pos[1] = r * sin(angle*M_PI/180.);
+	    points[idx].pos[2] = z;
+	    ++idx;
+	    angle += da;
+	  }
+	}
+
+
+	lib3ds_mesh_new_face_list(mesh, (nprofile-1) * nstep * 2);
+	faces = mesh->faceL;
+
+	idx = 0;
+	for(i=0; i < nprofile-1; ++i) {
+	  for(j=0; j < nstep; ++j) {
+	    strncpy(faces[idx].material, material, sizeof(faces[idx].material));
+	    faces[idx].points[0] = (i+1) * nstep + (j+1)%nstep;
+	    faces[idx].points[1] = i * nstep + (j+1)%nstep;
+	    faces[idx].points[2] = (i+1) * nstep + j;
+	    faces[idx].smoothing = 1;
+	    ++idx;
+	    strncpy(faces[idx].material, material, sizeof(faces[idx].material));
+	    faces[idx].points[0] = i * nstep + (j+1)%nstep;
+	    faces[idx].points[1] = i * nstep + j;
+	    faces[idx].points[2] = (i+1) * nstep + j;
+	    faces[idx].smoothing = 1;
+	    ++idx;
+	  }
+	}
+
+	return mesh;
 }
