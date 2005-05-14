@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id:$" ;
+	"$Id: dome_cover.c,v 1.1 2005/05/14 02:11:48 efalk Exp $" ;
 #endif
 
 /**********
@@ -103,11 +103,15 @@ static	void	start_page(int pagenum);
 static	void	end_page(int pagenum);
 static	void	write_trailer();
 static	void	draw_face(Dome *dome, int face, FaceInfo *, int nf);
+static	void	draw_single_face(Dome *dome, FaceInfo *,
+			double x, double y, double w, double h);
 static	void	adjust_face(Point *p0, Point *p1, Point *p2,
 			Dome *dome, int face);
 
 
 #define	streq(a,b)	(strcmp(a,b) == 0)
+#define	max(a,b)	((a)>(b)?(a):(b))
+#define	min(a,b)	((a)<(b)?(a):(b))
 
 
 int
@@ -236,13 +240,41 @@ main(int argc, char **argv)
 	write_prolog();
 	start_page(1);
 
+	fprintf(ofile, "%d setlinewidth\n", color ? 0 : 1) ;
+
 	for( i=0; i < dome.nface; ++i)
 	  draw_face(&dome, i, faces, nf);
 
 	end_page(1);
 
 
-	/* TODO: diagrams for the individual pieces */
+	/* diagrams for the individual pieces */
+	{
+	  float w, h, x, y;
+	  w = (wid - lm - rm) / 2 * 72;
+	  h = (hgt - tm - bm) / 2 * 72;
+	  for( i = 0; i < nf; ++i ) {
+	    switch( i%4 ) {
+	      case 0:
+		start_page(2+i/4);
+		x = lm * 72; y = bm  * 72+ h;
+		break;
+	      case 1:
+		x = lm * 72 + w; y = bm  * 72+ h;
+		break;
+	      case 2:
+		x = lm * 72; y = bm * 72;
+		break;
+	      case 3:
+		x = lm * 72 + w; y = bm * 72;
+		break;
+	    }
+	    draw_single_face(&dome, &faces[i], x,y,w-36,h-36);
+	    if( i%4 == 3 )
+	      end_page(2+i/4);
+	  }
+	}
+
 	write_trailer();
 
 
@@ -439,6 +471,7 @@ findFace(FaceInfo *list, int n, const Dome *dome, int face)
 }
 
 
+/* Sort by frequency and then alphabetically by strut names */
 static	int
 facesort(const void *aa, const void *bb)
 {
@@ -446,8 +479,11 @@ facesort(const void *aa, const void *bb)
 	const FaceInfo *b = bb;
 	int i;
 
-	/* Sort by frequency */
-	return (i = b->count - a->count) ;
+	if( (i = b->count - a->count) == 0 &&
+	    (i = strcmp(a->s1->name, b->s1->name)) == 0 &&
+	    (i = strcmp(a->s2->name, b->s2->name)) == 0)
+	     i = strcmp(a->s3->name, b->s3->name);
+	return i;
 }
 
 
@@ -502,7 +538,7 @@ start_page(int pagenum)
 {
 	fprintf(ofile, "%%%%Page: \"%d\" %d\n\n", pagenum, pagenum) ;
 	fprintf(ofile, "0 setlinejoin\n0 setlinecap\n[] 0 setdash\n") ;
-	fprintf(ofile, "%d setlinewidth\n", color ? 0 : 1) ;
+	fprintf(ofile, "1 setlinewidth\n") ;
 }
 
 
@@ -626,7 +662,7 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 
 
 /**
- * Adjust the two endpoints so that they're the specified distance
+ * Adjust the vertices so that they're the specified distance
  * apart.
  */
 static void
@@ -640,4 +676,51 @@ adjust_face(Point *p0, Point *p1, Point *p2, Dome *dome, int face)
 	projectPointOnLine(p0, p1, p0, d, p0);
 	projectPointOnLine(p1, p0, p1, d, p1);
 #endif	/* TODO */
+}
+
+
+
+static void
+draw_single_face(Dome *dome, FaceInfo *face, double x, double y, double w, double h)
+{
+	double	xs, ys;
+	double	maxlen;
+	double	A = face->s1->len, B = face->s2->len, C = face->s3->len;
+	double	x0,y0, x1,y1, x2,y2;
+
+	maxlen = max(A, B);
+	maxlen = max(maxlen, C);
+	if( maxlen <= 0. ) {
+	  fprintf(stderr, "invalid dimensions, face %s\n", face->name);
+	  return;
+	}
+	xs = w/maxlen;
+	ys = (h-textheight*2)/maxlen;
+	xs = ys = min(xs,ys);
+
+	y += textheight * 2;
+
+	x0 = 0; y0 = 0;
+	x1 = C; y1 = 0;
+	x2 = (A*A - B*B + C*C)/(2*C);
+	y2 = sqrt(A*A - x2*x2);
+
+	fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath stroke\n",
+	    x0*xs + x, y0*ys + y, x1*xs + x, y1*ys + y, x2*xs + x, y2*ys + y);
+
+	fprintf(ofile, "labelFont setfont\n");
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
+	  (x0+x1+x2)/3*xs + x, (y0+y1+y2)/3*ys + y, face->name);
+
+	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
+	  (x0+x2)/2*xs + x, (y0+y2)/2*ys + y, A*scale, face->s1->name);
+
+	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
+	  (x2+x1)/2*xs + x, (y2+y1)/2*ys + y, B*scale, face->s2->name);
+
+	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
+	  (x0+x1)/2*xs + x, (y0+y1)/2*ys + y, C*scale, face->s3->name);
+
+	fprintf(ofile, "%g %g moveto (Panel %s, make %d) ctrTxt\n",
+	  (x0+x1)/2*xs + x, -textheight*1.5 + y, face->name, face->count);
 }
