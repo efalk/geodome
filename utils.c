@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$" ;
+	"$Id: utils.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
 #endif
 
 /**********
@@ -28,7 +28,9 @@ static const char rcsid[] =
  **********/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -118,17 +120,36 @@ normalize(Point *v)
 
 
 /**
+ * Return a cross product of two vectors.
+ */
+void
+crossprod(const Point *v1, const Point *v2, Point *out)
+{
+   out->x = v1->y*v2->z - v1->z*v2->y;
+   out->y = v1->z*v2->x - v1->x*v2->z;
+   out->z = v1->x*v2->y - v1->y*v2->x;
+}
+
+
+/**
  * Return a normalized cross product of two vectors.
  */
 void
 normcrossprod(const Point *v1, const Point *v2, Point *out)
 {
-   out->x = v1->y*v2->z - v1->z*v2->y;
-   out->y = v1->z*v2->x - v1->x*v2->z;
-   out->z = v1->x*v2->y - v1->y*v2->x;
+   crossprod(v1, v2, out);
    normalize(out);
 }
 
+
+/**
+ * Return a dot product of two vectors.
+ */
+double
+dotprod(const Point *v1, const Point *v2)
+{
+	return v1->x * v2->x + v1->y * v2->y + v1->z * v2->z;
+}
 
 
 /**
@@ -156,6 +177,84 @@ ptInterp(const Point *a, const Point *b, double f, Point *out)
 }
 
 
+
+typedef struct {
+  const float vals[3];
+  const char *name;
+} ColorDef;
+
+static	ColorDef colordefs[] = {	/* color definitions */
+  {{1, 0, 0}, "red"},
+  {{0, 1, 0}, "green"},
+  {{0, 0, 1}, "blue"},
+  {{.8, .8, 0}, "yellow"},
+  {{1, 0, 1}, "magenta"},
+  {{0, 1, 1}, "cyan"},
+  {{1, .5, 0}, "orange"},
+  {{0, 0, 0}, "black"},
+  {{.647, .164, .164}, "brown"},
+};
+
+static	ColorDef *defcolors[] = {		/* default color list */
+  colordefs + 0,
+  colordefs + 1,
+  colordefs + 2,
+  colordefs + 3,
+  colordefs + 4,
+  colordefs + 5,
+  colordefs + 6,
+  colordefs + 7,
+  colordefs + 8,
+};
+
+static	ColorDef **colors = defcolors;
+static	int	ncolors = NA(defcolors);
+
+
+
+/**
+ * Parse a "color,color,color,..." list, rebuild colors array
+ */
+void
+parse_colors(char *clist)
+{
+	char	*ptr, *p2;
+	int	i,j, len;
+	ColorDef *def;
+
+	ptr = clist;
+	for(ncolors = 1; (ptr = strchr(ptr,',')) != NULL; ++ptr, ++ncolors);
+	colors = (ColorDef **) malloc(ncolors * sizeof(*colors));
+
+	ptr = clist;
+	for(i = 0; i < ncolors; ++i) {
+	  p2 = strchr(ptr, ',');
+	  len = p2 != NULL ? p2 - ptr : strlen(ptr);
+	  colors[i] = NULL;
+	  for(j=NA(colordefs), def = colordefs; --j >= 0; ++def) {
+	    if( strncasecmp(ptr, def->name, len) == 0 ) {
+	      colors[i] = def;
+	      break;
+	    }
+	  }
+	  if( colors[i] == NULL ) {
+	    if( p2 != NULL ) *p2 = '\0';
+	    fprintf(stderr, "color %s not found, options are:\n", ptr);
+	    for(j=NA(colordefs), def = colordefs; --j >= 0; ++def)
+	      fprintf(stderr, " %s,", def->name);
+	    fprintf(stderr, "\n");
+	    exit(2);
+	  }
+	  ptr = p2 + 1;
+	}
+}
+
+
+const float *
+get_color(int c)
+{
+	return colors[c % ncolors]->vals;
+}
 
 void
 assfail(const char *e, const char *file, int line)

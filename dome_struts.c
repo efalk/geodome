@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_struts.c,v 1.2 2004/11/12 08:08:02 efalk Rel $" ;
+	"$Id: dome_struts.c,v 1.3 2005/04/20 01:50:04 efalk Exp $" ;
 #endif
 
 /**********
@@ -35,7 +35,8 @@ static const char usage[] =
 "	-bl l		specify length of bend (.75/12)\n"
 "	-at d		angle tolerance, in degrees (2)\n"
 "	-lt p		length tolerance, in percent (.1)\n"
-"	-in		convert feet to inches\n"
+"	-scale s	specify scale factor (1.)\n"
+"	-in		convert feet to inches (scale factor 12)\n"
 "\n"
 "See instructions for more details.\n"
 ;

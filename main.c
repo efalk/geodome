@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: main.c,v 1.1 2004/11/12 07:13:22 efalk Rel $";
+	"$Id: main.c,v 1.2 2005/04/20 01:44:47 efalk Exp $";
 #endif
 
 /**********
@@ -59,9 +59,9 @@ static const char usage[] =
 
 
 
-typedef enum {FACES, EDGES, VERTICES, NORMALIZE, NORMALIZING, ROTATING,
-		DELETING, DELETE_ROW, PRINT, READ, RAISE_VERT, EXTEND,
-		EXTEND2, LEVEL, RAISE} Command;
+typedef enum {FACES, EDGES, VERTICES, NORMALIZE, NORMALIZING,
+		NORMALIZING_H, ROTATING, DELETING, DELETE_ROW, PRINT,
+		READ, RAISE_VERT, EXTEND, EXTEND2, LEVEL, RAISE} Command;
 
 	float	radius = 12.;
 
@@ -169,6 +169,7 @@ main(int argc, char *argv[])
 	glutAddMenuEntry("Extend Vertex", EXTEND);
 	glutAddMenuEntry("Extend Vertex radial", EXTEND2);
 	glutAddMenuEntry("Normalize Vertex", NORMALIZING);
+	glutAddMenuEntry("Normalize Vertex Horizontally", NORMALIZING_H);
 	glutAddMenuEntry("Level bottom (l)", LEVEL);
 	glutAddMenuEntry("Raise dome", RAISE);
 	glutAddMenuEntry("Save", PRINT);
@@ -442,6 +443,7 @@ menuCB(int value)
 	  case EXTEND:
 	  case EXTEND2:
 	  case NORMALIZING:
+	  case NORMALIZING_H:
 	    runMode = value;
 	    break;
 	  case FACES:
@@ -653,18 +655,29 @@ mouse(int button, int state, int x, int y)
 		break;
 
 	      case NORMALIZING:
+	      case NORMALIZING_H:
 		if( state == GLUT_DOWN ) {
 		  hits = pick(x, y);
 		  selection = findSelected (hits, selectBuf);
 		  if( selection >= VTX_BASE ) {
-		    normalize_vertex(&cdome.vertices[selection-VTX_BASE],
-		    	radius, 1.);
+		    switch( runMode ) {
+		      case NORMALIZING:
+			normalize_vertex(&cdome.vertices[selection-VTX_BASE],
+			  radius, 1.);
+			break;
+		      case NORMALIZING_H:
+			normalize_vertex_h(&cdome.vertices[selection-VTX_BASE],
+			  radius);
+			break;
+		      default:
+			break;
+		    }
+		    edge_lengths(&cdome);
+		    render_dome(&cdome);
+		    glClear(GL_DEPTH_BUFFER_BIT);
+		    view_element(selection);
+		    glutSwapBuffers();
 		  }
-		  edge_lengths(&cdome);
-		  render_dome(&cdome);
-		  glClear(GL_DEPTH_BUFFER_BIT);
-		  view_element(selection);
-		  glutSwapBuffers();
 		}
 		else
 		  draw();

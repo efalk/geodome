@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_file.c,v 1.3 2005/04/19 18:45:47 efalk Exp $" ;
+	"$Id: dome_file.c,v 1.4 2005/04/20 01:44:47 efalk Exp $" ;
 #endif
 
 /**********
@@ -82,8 +82,9 @@ read_dome(Dome *dome, FILE *ifile)
 	char	name[80];
 
 	clear_dome(dome);
-	if( fscanf(ifile, "radius: %g\n", &radius) < 1 )
+	if( fscanf(ifile, "radius: %lg\n", &dome->radius) < 1 )
 	  goto out;
+	radius = dome->radius;
 	if( fscanf(ifile, "%d vertices:\n", &dome->nvert) < 1 )
 	  goto out;
 	dome->vertices = malloc(dome->nvert * sizeof(*dome->vertices));

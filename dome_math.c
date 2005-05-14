@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_math.c,v 1.2 2005/04/19 18:45:58 efalk Exp $" ;
+	"$Id: dome_math.c,v 1.3 2005/04/20 01:44:47 efalk Exp $" ;
 #endif
 
 /**********
@@ -43,7 +43,6 @@ static	void	tesselate1(const Dome *in, Face face, int f, Dome *out,
 static	void	add_face(Point *p0, Point *p1, Point *p2, Dome *dome,
 			int *nf, int *ne, int *nv);
 static	int	match_vtx(Point *vtx, Dome *dome, int *nv);
-static	int	match_edge(int v0, int v1, Dome *dome, int *ne);
 static	void	find_neighbors(Dome *dome, int v, Vertex *vertices,
 			Edge **e0, Edge **e1, int *v0, int *v1);
 #ifdef	COMMENT
@@ -95,12 +94,14 @@ static Face icos_face[20] = {
 
 
 	Dome	f0ball = {
+	  1.,
 	  icos_vert, NA(icos_vert),
 	  icos_edge, NA(icos_edge),
 	  icos_face, NA(icos_face)
 	};
 
 	Dome	f0dome = {
+	  1.,
 	  icos_vert, NA(icos_vert)-1,
 	  icos_edge, NA(icos_edge)-5,
 	  icos_face, NA(icos_face)-5
@@ -397,20 +398,42 @@ match_vtx(Point *vtx, Dome *dome, int *nv)
 
 
 /**
- * Return the index of the edge that matches this one.  Insert if needed.
+ * Return the index of the edge that matches this one.
+ *
+ * \param v0, v1  vertices to match
+ * \param dome    dome containing vertices and edges
  */
-static	int
-match_edge(int v0, int v1, Dome *dome, int *ne)
+int
+find_edge(int v0, int v1, const Dome *dome)
 {
 	int	i;
 
-	for(i=0; i < *ne; ++i)
+	for(i=0; i < dome->nedge; ++i)
 	  if( (dome->edges[i].v0 == v0 && dome->edges[i].v1 == v1)  ||
 	      (dome->edges[i].v1 == v0 && dome->edges[i].v0 == v1) )
 	    return i;
 
+	return -1;
+}
+
+
+/**
+ * Return the index of the edge that matches this one.  Insert if needed.
+ *
+ * \param v0, v1  vertices to match
+ * \param dome    dome containing vertices and edges
+ * \param ne      number of edges in dome.
+ */
+int
+match_edge(int v0, int v1, const Dome *dome, int *ne)
+{
+	int	i;
+
+	if( (i = find_edge(v0, v1, dome)) >= 0 )
+	  return i;
+
 	if( *ne >= dome->nedge ) {
-	  fprintf(stderr, "Internal error: out of edges in tesselate\n");
+	  fprintf(stderr, "Internal error: out of edges in match_edge\n");
 	  return 0;
 	}
 
@@ -436,6 +459,30 @@ normalize_vertex(Point *vtx, double r, double frac)
 	  l = frac/l + frac1;
 	  l *= r;
 	  vtx->x *= l; vtx->y *= l; vtx->z *= l;
+	}
+}
+
+
+
+/**
+ * Same as normalize_vertex(), but only normalizes in X-Y plane.
+ */
+void
+normalize_vertex_h(Point *vtx, double r)
+{
+	double	l, r2;
+
+	if( vtx->z >= r || vtx->z <= -r ) {
+	  normalize_vertex(vtx, r, 1.);
+	  return;
+	}
+
+	l = lenXY(vtx);
+	if( l > 0. )
+	{
+	  r2 = sqrt(r*r - vtx->z*vtx->z);
+	  l = r2/l;
+	  vtx->x *= l; vtx->y *= l;
 	}
 }
 
@@ -1005,12 +1052,12 @@ find_new_point(Point *p, Point *p0, Point *p1, double L0, double L1)
 /**
  * Find the projection of a point on a line, with optional offset.
  *
- * \param l0	first endpoint of line
- * \param l1	second endpoint of line
- * \param pt	point to project onto line
+ * \param l0	 first endpoint of line
+ * \param l1	 second endpoint of line
+ * \param pt	 point to project onto line
  * \param offset optional offset; returned point will be this much
  *		 further away from l0.
- * \param rval	Returned point.
+ * \param rval	 Returned point.
  *
  * \returns 1 on success, 0 on degenerate line
  *
@@ -1018,7 +1065,7 @@ find_new_point(Point *p, Point *p0, Point *p1, double L0, double L1)
  */
 
 int
-projectPointOnLine(Point *l0, Point *l1, Point *pt, double offset, Point *rval)
+projectPointOnLine(const Point *l0, const Point *l1, const Point *pt, double offset, Point *rval)
 {
 	double	vx, vy, vz;
 	double	vx2, vy2, vz2;
@@ -1118,6 +1165,8 @@ assign_labels(Dome *dome, StrutInfo **info, double at, double lt)
 
 	if( info != NULL )
 	  *info = rval;
+	else
+	  free(rval);
 
 	return ninfo;
 }
@@ -1205,6 +1254,45 @@ strutsort(const void *aa, const void *bb)
 
 	/* Then by length */
 	return b->len > a->len ? 1 : -1;
+}
+
+
+/**
+ * Take a point, and project it to the "flattened" x-y coordinate system.
+ */
+void
+project_point(Point *p)
+{
+	Point	p0, p1;
+	static Point zero = {0.,0.,0.};
+	double	a;
+	double	dist;
+
+	/* How do we flatten this?  Find the circumfrential distance
+	 * from the top of the dome to the vertex, project the
+	 * vertex that far from the center.
+	 */
+
+	/* Find the angle described by this point.  Since we're taking
+	 * the angle relative to a vertical vector (0,0,1), this is
+	 * trivially computed from the z component of the normalized
+	 * vector.
+	 */
+
+	p0 = *p;
+	normalize_vertex(&p0, 1., 1.);
+	a = acos(p0.z);
+	dist = a * radius;
+
+	p1.x = p->x; p1.y = p->y; p1.z = 0.;
+
+	/* See projectPointOnLine() documentation for more info.  In
+	 * essense, what this call does is to project 0 onto the 0-p1
+	 * line.  Normally, this lands back at 0, but then the 'dist'
+	 * parameter offsets it to where we want.
+	 */
+	if( !projectPointOnLine(&zero, &p1, &zero, dist, p) )
+	  p->z = 0.;
 }
 
 

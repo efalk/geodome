@@ -1,7 +1,7 @@
 #ifndef	DOME_H
 #define	DOME_H
 
-/* $Id$ */
+/* $Id: dome.h,v 1.3 2004/11/12 23:56:48 efalk Rel $ */
 
 #define	EDGE_BASE	5000
 #define	VTX_BASE	10000
@@ -21,6 +21,7 @@ typedef struct {
 	} Vertex;
 
 typedef	struct {
+	  double radius;
 	  Point	*vertices;
 	  int	nvert;
 	  Edge	*edges;
@@ -71,17 +72,21 @@ extern	void	copy_dome_values(const Dome *in, Dome *out);
 extern	void	copy_dome(const Dome *in, Dome *out);
 extern	void	tesselate(const Dome *in, Dome *out, int f);
 extern	void	normalize_vertex(Point *vtx, double r, double frac);
+extern	void	normalize_vertex_h(Point *vtx, double r);
 extern	void	normalize_dome(Dome *dome, double r, double frac);
 extern	void	delete_row(Dome *dome);
 extern	void	scale_dome(Dome *dome, double f);
 extern	void	edge_lengths(Dome *dome);
-extern	int	projectPointOnLine(Point *l0, Point *l1, Point *pt,
-			double offset, Point *rval);
+extern	int	projectPointOnLine(const Point *l0, const Point *l1,
+			const Point *pt, double offset, Point *rval);
 extern	int	projectPoint(Point *p0, Point *p1, double dist, Point *rval);
 extern	void	level_bottom(Dome *dome);
 extern	void	raise_dome(Dome *dome);
 extern	void	level_bottom2(Dome *dome);
 extern	int	assign_labels(Dome *dome, StrutInfo **, double, double);
+extern	void	project_point(Point *p);
+extern	int	find_edge(int v0, int v1, const Dome *dome);
+extern	int	match_edge(int v0, int v1, const Dome *dome, int *ne);
 
 extern	double	dome_max(Dome *dome);
 extern	double	dome_min(Dome *dome);

@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_layout.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
+	"$Id: dome_layout.c,v 1.2 2004/11/12 08:08:02 efalk Exp $" ;
 #endif
 
 /**********
@@ -85,9 +85,7 @@ static	void	start_page(int pagenum);
 static	void	end_page(int pagenum);
 static	void	write_trailer(void);
 static	void	draw_edge(Dome *, Edge *);
-static	void	project_point(Point *);
 static	void	adjust_edge(Point *p0, Point *p1, double len);
-static	void	parse_colors(char *colors);
 
 
 #define	streq(a,b)	(strcmp(a,b) == 0)
@@ -150,21 +148,14 @@ main(int argc, char **argv)
 	ns = assign_labels(&dome, &struts, at, lt);
 	c0 = struts[0].name[0];
 
-	/* Guess radius from the highest point on the dome */
-	radius = dome_max(&dome);
+	radius = dome.radius;
 
 	/* Find the bounding box of the projected vertices */
 	xmin = xmax = ymin = ymax = 0.;
 	for(i=0; i < dome.nvert; ++i)
 	{
 	  Point pt = dome.vertices[i];
-#ifdef	COMMENT
-	  printf("(%g,%g,%g) => ", pt.x, pt.y, pt.z);
-#endif	/* COMMENT */
 	  project_point(&pt);
-#ifdef	COMMENT
-	  printf("(%g,%g,%g)\n", pt.x, pt.y, pt.z);
-#endif	/* COMMENT */
 	  xmin = MIN(xmin, pt.x); xmax = MAX(xmax, pt.x);
 	  ymin = MIN(ymin, pt.y); ymax = MAX(ymax, pt.y);
 	}
@@ -269,38 +260,6 @@ write_trailer()
 }
 
 
-typedef struct {
-  const char *vals;
-  const char *name;
-} ColorDef;
-
-static	ColorDef colordefs[] = {	/* color definitions */
-  {"1 0 0", "red"},
-  {"0 1 0", "green"},
-  {"0 0 1", "blue"},
-  {".8 .8 0", "yellow"},
-  {"1 .5 0", "orange"},
-  {"1 0 1", "magenta"},
-  {"0 1 1", "cyan"},
-  {"0 0 0", "black"},
-  {".647 .164 .164", "brown"},
-};
-
-static	ColorDef *defcolors[] = {		/* default color list */
-  colordefs + 0,
-  colordefs + 1,
-  colordefs + 2,
-  colordefs + 3,
-  colordefs + 4,
-  colordefs + 5,
-  colordefs + 6,
-  colordefs + 7,
-  colordefs + 8,
-};
-
-static	ColorDef **colors = defcolors;
-static	int	ncolors = NA(defcolors);
-
 
 /**
  * Write out an edge in postscript.  Generate a transformation that
@@ -334,8 +293,8 @@ draw_edge(Dome *dome, Edge *edge)
 	fprintf(ofile, "%% strut %s\n", edge->name);
 	if( color ) {
 	  int c = edge->name[0] - c0;
-	  fprintf(ofile, "%s setrgbcolor\n",
-	    colors[c % ncolors]->vals);
+	  const float *clr = get_color(c);
+	  fprintf(ofile, "%g %g %g setrgbcolor\n", clr[0], clr[1], clr[2]);
 	}
 	fprintf(ofile, "newpath %g %g moveto %g %g lineto stroke\n",
 	  p0.x, p0.y, p1.x, p1.y);
@@ -346,45 +305,6 @@ draw_edge(Dome *dome, Edge *edge)
 	ly = (p0.y + p1.y) / 2;
 	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n\n", lx, ly, edge->name);
 
-}
-
-
-/**
- * Take a point, and project it to the "flattened" x-y coordinate system.
- */
-static void
-project_point(Point *p)
-{
-	Point	p0, p1;
-	static Point zero = {0.,0.,0.};
-	double	a;
-	double	dist;
-
-	/* How do we flatten this?  Find the circumfrential distance
-	 * from the top of the dome to the vertex, project the
-	 * vertex that far from the center.
-	 */
-
-	/* Find the angle described by this point.  Since we're taking
-	 * the angle relative to a vertical vector (0,0,1), this is
-	 * trivially computed from the z component of the normalized
-	 * vector.
-	 */
-
-	p0 = *p;
-	normalize_vertex(&p0, 1., 1.);
-	a = acos(p0.z);
-	dist = a * radius;
-
-	p1.x = p->x; p1.y = p->y; p1.z = 0.;
-
-	/* See projectPointOnLine() documentation for more info.  In
-	 * essense, what this call does is to project 0 onto the 0-p1
-	 * line.  Normally, this lands back at 0, but then the 'dist'
-	 * parameter offsets it to where we want.
-	 */
-	if( !projectPointOnLine(&zero, &p1, &zero, dist, p) )
-	  p->z = 0.;
 }
 
 
@@ -402,42 +322,4 @@ adjust_edge(Point *p0, Point *p1, double len)
 
 	projectPointOnLine(p0, p1, p0, d, p0);
 	projectPointOnLine(p1, p0, p1, d, p1);
-}
-
-
-/**
- * Parse a "color,color,color,..." list, rebuild colors array
- */
-static	void
-parse_colors(char *clist)
-{
-	char	*ptr, *p2;
-	int	i,j, len;
-	ColorDef *def;
-
-	ptr = clist;
-	for(ncolors = 1; (ptr = strchr(ptr,',')) != NULL; ++ptr, ++ncolors);
-	colors = (ColorDef **) malloc(ncolors * sizeof(*colors));
-
-	ptr = clist;
-	for(i = 0; i < ncolors; ++i) {
-	  p2 = strchr(ptr, ',');
-	  len = p2 != NULL ? p2 - ptr : strlen(ptr);
-	  colors[i] = NULL;
-	  for(j=NA(colordefs), def = colordefs; --j >= 0; ++def) {
-	    if( strncasecmp(ptr, def->name, len) == 0 ) {
-	      colors[i] = def;
-	      break;
-	    }
-	  }
-	  if( colors[i] == NULL ) {
-	    if( p2 != NULL ) *p2 = '\0';
-	    fprintf(stderr, "color %s not found, options are:\n", ptr);
-	    for(j=NA(colordefs), def = colordefs; --j >= 0; ++def)
-	      fprintf(stderr, " %s,", def->name);
-	    fprintf(stderr, "\n");
-	    exit(2);
-	  }
-	  ptr = p2 + 1;
-	}
 }

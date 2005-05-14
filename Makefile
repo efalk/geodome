@@ -1,20 +1,20 @@
-#	$Id: Makefile,v 1.1 2004/11/12 07:18:20 efalk Rel $
+#	$Id: Makefile,v 1.2 2005/04/19 18:47:22 efalk Exp $
 
 # Note: version number in Makefile, geodome.lsm, geodome.spec
 
 VERSION = 1.1
 
-#OPT = -g -Wall -DDEBUG
-OPT = -O
+OPT = -g -Wall -DDEBUG
+#OPT = -O
 
-#LDFLAGS = -g
-LDFLAGS = -s
+LDFLAGS = -g
+#LDFLAGS = -s
 
 
 # Probably no need to edit anything below this line.
 
 
-PGMS = dome dome_struts dome_layout dome_3ds
+PGMS = dome dome_struts dome_cover dome_layout dome_3ds
 
 DOC = AUTHORS INSTRUCTIONS README
 
@@ -45,11 +45,14 @@ DOME_3DS_OBJS =	$(DOME_3DS_SRCS:.c=.o)
 DOME_STRUTS_SRCS = dome_struts.c dome_file.c dome_math.c utils.c
 DOME_STRUTS_OBJS = $(DOME_STRUTS_SRCS:.c=.o)
 
+DOME_COVER_SRCS = dome_cover.c dome_file.c dome_math.c utils.c
+DOME_COVER_OBJS = $(DOME_COVER_SRCS:.c=.o)
+
 DOME_LAYOUT_SRCS = dome_layout.c dome_file.c dome_math.c utils.c
 DOME_LAYOUT_OBJS = $(DOME_LAYOUT_SRCS:.c=.o)
 
 ALL_SRCS = 3ds_utils.c dome_3ds.c dome.c dome_file.c dome_layout.c \
-	dome_math.c dome_struts.c main.c utils.c
+	dome_math.c dome_struts.c main.c utils.c dome_cover.c
 
 
 
@@ -58,6 +61,9 @@ dome:	$(DOME_OBJS)
 
 dome_struts: $(DOME_STRUTS_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(DOME_STRUTS_OBJS) -lm
+
+dome_cover: $(DOME_COVER_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(DOME_COVER_OBJS) -lm
 
 dome_layout: $(DOME_LAYOUT_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(DOME_LAYOUT_OBJS) -lm
