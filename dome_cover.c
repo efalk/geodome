@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_cover.c,v 1.2 2005/05/14 03:20:05 efalk Exp $" ;
+	"$Id: dome_cover.c,v 1.3 2005/05/15 17:37:16 efalk Exp $" ;
 #endif
 
 /**********
@@ -30,11 +30,11 @@ static const char usage[] =
 "dome_cover -- generate cover layout for geodesic dome\n"
 "\n"
 "usage:	dome_cover [options] [domefile [outfile]]\n"
-"	-diam d		specify pipe diameter (.75/12)\n"
-"	-at d		angle tolerance, in degrees (2)\n"
-"	-lt p		length tolerance, in percent (.1)\n"
-"	-scale s	specify scale factor (1.)\n"
-"	-in		convert feet to inches (scale factor 12)\n"
+"	-diam d		  specify pipe diameter (.75/12)\n"
+"	-at d		  angle tolerance, in degrees (2)\n"
+"	-lt p		  length tolerance, in percent (.1)\n"
+"	-scale s	  specify scale factor (1.)\n"
+"	-in		  convert feet to inches (scale factor 12)\n"
 "	-paper WxH	  page size (8.5 x 11.5)\n"
 "	-margins l,r,t.b  margins (1,.5,.5,.5)\n"
 "	-textheight h	  set text height, points (10)\n"

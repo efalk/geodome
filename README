@@ -1,4 +1,4 @@
-	$Id: README,v 1.1 2004/11/12 07:18:20 efalk Rel $
+	$Id: README,v 1.2 2004/11/29 22:44:02 efalk Exp $
 
 
 Geodesic dome design programs
@@ -15,6 +15,7 @@ Geodesic dome design programs
 
     dome_struts:  generate a strut cutting list from a dome file
     dome_layout:  generate an assembly diagram from a dome file
+    dome_cover:   generate diagrams for making a fitted cover
     dome_3ds:     generate 3-D Studio file from a dome file
 
 
@@ -35,13 +36,15 @@ HOW TO BUILD
     Once this is installed, modify Makefile as necessary and type "make",
     or "make install" to put the binaries into /usr/local.
 
-    dome_struts and dome_layout do not require any special libraries.
+    dome_struts, dome_layout, and dome_cover do not require any special libraries.
 
 
 
 HISTORY
 
 	1.0	First version
+	1.1	Bug fixes
+	1.2	Add dome_cover
 
 AUTHOR
 	Edward A. Falk <efalk@sourceforge.net>
@@ -51,7 +54,7 @@ AUTHOR
 
 LICENSE
 
-    Copyright © 2004    Edward A. Falk
+    Copyright © 2004,2005    Edward A. Falk
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),

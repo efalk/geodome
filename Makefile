@@ -1,14 +1,14 @@
-#	$Id: Makefile,v 1.2 2005/04/19 18:47:22 efalk Exp $
+#	$Id: Makefile,v 1.3 2005/05/14 02:11:48 efalk Exp $
 
 # Note: version number in Makefile, geodome.lsm, geodome.spec
 
-VERSION = 1.1
+VERSION = 1.2
 
-OPT = -g -Wall -DDEBUG
-#OPT = -O
+#OPT = -g -Wall -DDEBUG
+OPT = -O
 
-LDFLAGS = -g
-#LDFLAGS = -s
+#LDFLAGS = -g
+LDFLAGS = -s
 
 
 # Probably no need to edit anything below this line.

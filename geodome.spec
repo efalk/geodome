@@ -1,6 +1,6 @@
-# $Id: geodome.spec,v 1.2 2004/11/12 23:56:48 efalk Exp $
+# $Id: geodome.spec,v 1.3 2005/04/19 18:47:22 efalk Exp $
 
-%define	ver	1.1
+%define	ver	1.2
 %define	RELEASE	1
 %define rel     %{?CUSTOM_RELEASE} %{!?CUSTOM_RELEASE:%RELEASE}
 %define	prefix	/usr
