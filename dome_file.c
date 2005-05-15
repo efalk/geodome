@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_file.c,v 1.4 2005/04/20 01:44:47 efalk Exp $" ;
+	"$Id: dome_file.c,v 1.5 2005/05/14 02:11:48 efalk Exp $" ;
 #endif
 
 /**********
@@ -89,7 +89,7 @@ read_dome(Dome *dome, FILE *ifile)
 	  goto out;
 	dome->vertices = malloc(dome->nvert * sizeof(*dome->vertices));
 	for(i=0; i < dome->nvert; ++i)
-	  if( fscanf(ifile, "%3d: %g,%g,%g\n", &j,
+	  if( fscanf(ifile, "%d: %g,%g,%g\n", &j,
 	    &dome->vertices[i].x, &dome->vertices[i].y, &dome->vertices[i].z)
 	    	< 4 )
 	    goto out;
@@ -99,7 +99,7 @@ read_dome(Dome *dome, FILE *ifile)
 	dome->edges = malloc(dome->nedge * sizeof(*dome->edges));
 	for(i=0, edge = dome->edges; i < dome->nedge; ++i, ++edge)
 	{
-	  if( fscanf(ifile, "%3d: %d,%d, %lg \"%78[^\"]\"\n",
+	  if( fscanf(ifile, "%d: %d,%d, %lg \"%78[^\"]\"\n",
 	    &j, &edge->v0, &edge->v1, &edge->len, name) < 5 )
 	      goto out;
 	  if( strcmp(name, "-") != 0 )
@@ -112,7 +112,7 @@ read_dome(Dome *dome, FILE *ifile)
 	  goto out;
 	dome->faces = malloc(dome->nface * sizeof(*dome->faces));
 	for(i=0, face = dome->faces; i < dome->nface; ++i, ++face)
-	  if( fscanf(ifile, "%3d: %d,%d,%d\n",
+	  if( fscanf(ifile, "%d: %d,%d,%d\n",
 	    &j, &face[0][0], &face[0][1], &face[0][2]) < 4 )
 	      goto out;
 
