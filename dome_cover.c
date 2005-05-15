@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_cover.c,v 1.1 2005/05/14 02:11:48 efalk Exp $" ;
+	"$Id: dome_cover.c,v 1.2 2005/05/14 03:20:05 efalk Exp $" ;
 #endif
 
 /**********
@@ -123,6 +123,8 @@ main(int argc, char **argv)
 	Dome	dome;
 	FaceInfo *fp;
 	int	i;
+	int	pagenum = 0;
+	int	strut_page;
 	static const Point	p0 = {0.,0.,0.};
 
 	ofile = stdout;
@@ -173,6 +175,14 @@ main(int argc, char **argv)
 	  exit(4);
 	}
 
+	/* Convert dimensions from inches to postscript points */
+	wid *= 72;
+	hgt *= 72;
+	lm *= 72;
+	rm *= 72;
+	tm *= 72;
+	bm *= 72;
+
 	read_dome(&dome, ifile);
 
 	/* Increase the dome radius slightly, to account for the
@@ -195,7 +205,6 @@ main(int argc, char **argv)
 	  ftotal, nf);
 
 	fprintf(stderr, " face  count       e1          e2          e3\n");
-
 
 	for(i=0, fp = faces; i < nf; ++i, ++fp)
 	{
@@ -222,56 +231,99 @@ main(int argc, char **argv)
 	/* Compute transformation matrix */
 	/* TODO: multi-sheet */
 
+	/* If this is a single-sheet drawing, will the strut list fit on the
+	 * page below the diagram?
+	 */
+	strut_page = sheets != 1 || (nf+4)*(textheight*1.2) > (hgt-wid);
+
 	if( xmax > xmin && ymax > ymin )
 	{
 	  float w, h;
-	  w = (wid - lm - rm) * 72;	/* working space in ps points */
-	  h = (hgt - tm - bm) * 72;
+	  w = (wid - lm - rm);
+	  h = (hgt - tm - bm);
 
 	  sx = w / (xmax - xmin);
 	  sy = h / (ymax - ymin);
 
 	  sx = sy = MIN(sx, sy);
 
-	  tx = lm*72 + w/2;
-	  ty = bm*72 + h/2;
+	  tx = lm + w/2;
+	  ty = bm + (strut_page ? (h/2) : (h - w/2));
 	}
 
 	write_prolog();
-	start_page(1);
+	start_page(++pagenum);
 
-	fprintf(ofile, "%d setlinewidth\n", color ? 0 : 1) ;
+	fprintf(ofile, "%g setlinewidth\n\n", color ? .2 : 1.) ;
 
 	for( i=0; i < dome.nface; ++i)
 	  draw_face(&dome, i, faces, nf);
 
-	end_page(1);
+	if( strut_page ) {	/* strut list needs its own page */
+	  end_page(pagenum);
+	  start_page(++pagenum);
+	}
+
+	{
+	  /* Draw strut list */
+	  float x,y;
+	  y = strut_page ? (hgt - tm) - textheight : (bm + hgt - wid) - textheight;
+	  x = lm;
+	  fprintf(ofile, "%% strut list\nfixedFont setfont\n");
+	  fprintf(ofile, "%g %g moveto (%d faces total, %d different sizes) show\n",
+	    x, y, ftotal, nf);
+	  y -= textheight*1.2*2;
+
+	  fprintf(ofile,
+	    "%g %g moveto ( face  count       e1          e2          e3) show\n",
+	    x, y);
+	  y -= textheight*1.2;
+
+	  for(i=0, fp = faces; i < nf; ++i, ++fp)
+	  {
+	    fprintf(ofile,
+	      "%g %g moveto (%5s  %5d  %7.3f (%s) %7.3f (%s) %7.3f (%s)) show\n",
+	      x,y,
+	      fp->name, fp->count,
+	      fp->s1->len * scale, fp->s1->name,
+	      fp->s2->len * scale, fp->s2->name,
+	      fp->s3->len * scale, fp->s3->name);
+	    y -= textheight*1.2;
+	    if( y < bm ) {
+	      end_page(pagenum);
+	      start_page(++pagenum);
+	      y = (hgt - tm) - textheight;
+	    }
+	  }
+	}
+
+	end_page(pagenum);
 
 
 	/* diagrams for the individual pieces */
 	{
 	  float w, h, x, y;
-	  w = (wid - lm - rm) / 2 * 72;
-	  h = (hgt - tm - bm) / 2 * 72;
+	  w = (wid - lm - rm) / 2;
+	  h = (hgt - tm - bm) / 2;
 	  for( i = 0; i < nf; ++i ) {
 	    switch( i%4 ) {
 	      case 0:
-		start_page(2+i/4);
-		x = lm * 72; y = bm  * 72+ h;
+		start_page(++pagenum);
+		x = lm; y = bm + h;
 		break;
 	      case 1:
-		x = lm * 72 + w; y = bm  * 72+ h;
+		x = lm + w; y = bm + h;
 		break;
 	      case 2:
-		x = lm * 72; y = bm * 72;
+		x = lm; y = bm;
 		break;
 	      case 3:
-		x = lm * 72 + w; y = bm * 72;
+		x = lm + w; y = bm;
 		break;
 	    }
 	    draw_single_face(&dome, &faces[i], x,y,w-36,h-36);
-	    if( i%4 == 3 )
-	      end_page(2+i/4);
+	    if( i%4 == 3 || i == nf - 1 )
+	      end_page(pagenum);
 	  }
 	}
 
@@ -292,6 +344,7 @@ main(int argc, char **argv)
 
 	exit(0);
 }
+
 
 
 
@@ -408,12 +461,14 @@ compute_face(const Dome *dome, const int *face, FaceInfo *info)
 	}
 
 
-	/* Rotate to put first edge (alphabetically) to top */
-	if( strcmp(s1->name, s0->name) < 0 ) {
+	/* Rotate to put first edge (alphabetically) to top; if the first edge
+	 * is repeated, prefer aab to aba
+	 */
+
+	if( strcmp(s1->name, s0->name) < 0 && strcmp(s1->name, s2->name) <= 0 ) {
 	  tmp = s0; s0 = s1; s1 = s2; s2 = tmp;
 	}
-	else if( strcmp(s2->name, s0->name) < 0 ||
-		 (strcmp(s2->name, s0->name) == 0 && strcmp(s2->name, s1->name) < 0) ) {
+	else if( strcmp(s2->name, s0->name) <= 0 && strcmp(s2->name, s1->name) < 0 ) {
 	  tmp = s0; s0 = s2; s2 = s1; s1 = tmp;
 	}
 
@@ -499,7 +554,7 @@ write_prolog(void)
 	  "%%%%DocumentFonts: (atend)\n"
 	  "%%%%DocumentNeedsFonts: (atend)\n"
 	  "%%%%EndComments:\n\n",
-	  0.,0., wid*72., hgt*72., sheets) ;
+	  0.,0., wid, hgt, sheets) ;
 
 	fprintf(ofile, "%%%%BeginProlog\n\n") ;
 
@@ -524,10 +579,10 @@ write_prolog(void)
 	  "  dup stringbounds 2 copy 2 div neg exch 2 div neg exch rmoveto\n"
 	  "  1 setgray gsave rect grestore 0 setgray\n"
 	  "  show\n"
-	  "} bind def\n\n"
-	  "/labelFont /Times-Roman findfont %g scalefont def\n"
-	  "/edgeFont /Times-Roman findfont %g scalefont def\n",
-	  textheight, textheight-4.);
+	  "} bind def\n\n");
+	  fprintf(ofile, "/labelFont /Times-Roman findfont %g scalefont def\n", textheight);
+	  fprintf(ofile, "/edgeFont /Times-Roman findfont %g scalefont def\n", textheight-4);
+	  fprintf(ofile, "/fixedFont /Courier findfont %g scalefont def\n", textheight);
 
 	fprintf(ofile, "%%%%EndProlog\n\n") ;
 }
@@ -539,6 +594,7 @@ start_page(int pagenum)
 	fprintf(ofile, "%%%%Page: \"%d\" %d\n\n", pagenum, pagenum) ;
 	fprintf(ofile, "0 setlinejoin\n0 setlinecap\n[] 0 setdash\n") ;
 	fprintf(ofile, "1 setlinewidth\n") ;
+	fprintf(ofile, "\n");
 }
 
 
@@ -547,6 +603,7 @@ end_page(int pagenum)
 {
 	fprintf(ofile, "showpage\n\n");
 	fprintf(ofile, "%%%%EndPage: \"%d\" %d\n\n", pagenum, pagenum) ;
+	fprintf(ofile, "\n");
 }
 
 
@@ -610,9 +667,6 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 	    (clr[0]+3)/4., (clr[1]+3)/4., (clr[2]+3)/4.);
 	  fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath fill\n",
 	    p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-#ifdef	COMMENT
-	  fprintf(ofile, "%g %g %g setrgbcolor\n", clr[0],clr[1], clr[2]);
-#endif	/* COMMENT */
 	  fprintf(ofile, "0 setgray\n");
 	}
 	fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath stroke\n",
@@ -621,7 +675,7 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 	lx = (p0.x + p1.x + p2.x) / 3;
 	ly = (p0.y + p1.y + p2.y) / 3;
 	fprintf(ofile, "labelFont setfont\n");
-	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n\n", lx, ly, info->name);
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n", lx, ly, info->name);
 
 	/* Now label the edges.  We need to identify them first. */
 	fprintf(ofile, "edgeFont setfont\n");
@@ -629,41 +683,43 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 	i = find_edge(dome->faces[face][0], dome->faces[face][1], dome);
 	lx = (p0.x*5 + p1.x*5 + p2.x) / 11;
 	ly = (p0.y*5 + p1.y*5 + p2.y) / 11;
-	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n\n", lx, ly, dome->edges[i].name);
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n", lx, ly, dome->edges[i].name);
 
 	i = find_edge(dome->faces[face][1], dome->faces[face][2], dome);
 	lx = (p1.x*5 + p2.x*5 + p0.x) / 11;
 	ly = (p1.y*5 + p2.y*5 + p0.y) / 11;
-	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n\n", lx, ly, dome->edges[i].name);
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n", lx, ly, dome->edges[i].name);
 
 	i = find_edge(dome->faces[face][2], dome->faces[face][0], dome);
 	lx = (p2.x*5 + p0.x*5 + p1.x) / 11;
 	ly = (p2.y*5 + p0.y*5 + p1.y) / 11;
-	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n\n", lx, ly, dome->edges[i].name);
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n", lx, ly, dome->edges[i].name);
 
 #ifdef	COMMENT
 	i = find_edge(dome->faces[face][0], dome->faces[face][1], dome);
 	lx = (p0.x*5 + p1.x*5 + p2.x) / 11;
 	ly = (p0.y*5 + p1.y*5 + p2.y) / 11;
-	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n\n", lx, ly, dome->edges[i].len);
+	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n", lx, ly, dome->edges[i].len);
 
 	i = find_edge(dome->faces[face][1], dome->faces[face][2], dome);
 	lx = (p1.x*5 + p2.x*5 + p0.x) / 11;
 	ly = (p1.y*5 + p2.y*5 + p0.y) / 11;
-	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n\n", lx, ly, dome->edges[i].len);
+	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n", lx, ly, dome->edges[i].len);
 
 	i = find_edge(dome->faces[face][2], dome->faces[face][0], dome);
 	lx = (p2.x*5 + p0.x*5 + p1.x) / 11;
 	ly = (p2.y*5 + p0.y*5 + p1.y) / 11;
-	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n\n", lx, ly, dome->edges[i].len);
+	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n", lx, ly, dome->edges[i].len);
 #endif	/* COMMENT */
+
+	fprintf(ofile, "\n");
 }
 
 
 
 /**
  * Adjust the vertices so that they're the specified distance
- * apart.
+ * apart.  For exploded diagrams.
  */
 static void
 adjust_face(Point *p0, Point *p1, Point *p2, Dome *dome, int face)
@@ -705,6 +761,18 @@ draw_single_face(Dome *dome, FaceInfo *face, double x, double y, double w, doubl
 	x2 = (A*A - B*B + C*C)/(2*C);
 	y2 = sqrt(A*A - x2*x2);
 
+	fprintf(ofile, "%% face %s\n", face->name);
+
+	if( color ) {
+	  int c = face->name[0] - c0;
+	  const float *clr = get_color(c);
+	  fprintf(ofile, "%g %g %g setrgbcolor\n",
+	    (clr[0]+3)/4., (clr[1]+3)/4., (clr[2]+3)/4.);
+	  fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath fill\n",
+	    x0*xs + x, y0*ys + y, x1*xs + x, y1*ys + y, x2*xs + x, y2*ys + y);
+	  fprintf(ofile, "0 setgray\n");
+	}
+
 	fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath stroke\n",
 	    x0*xs + x, y0*ys + y, x1*xs + x, y1*ys + y, x2*xs + x, y2*ys + y);
 
@@ -723,4 +791,6 @@ draw_single_face(Dome *dome, FaceInfo *face, double x, double y, double w, doubl
 
 	fprintf(ofile, "%g %g moveto (Panel %s, make %d) ctrTxt\n",
 	  (x0+x1)/2*xs + x, -textheight*1.5 + y, face->name, face->count);
+
+	fprintf(ofile, "\n");
 }
