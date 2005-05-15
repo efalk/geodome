@@ -1,4 +1,4 @@
-# $Id: geodome.spec,v 1.3 2005/04/19 18:47:22 efalk Exp $
+# $Id: geodome.spec,v 1.4 2005/05/15 18:14:05 efalk Exp $
 
 %define	ver	1.2
 %define	RELEASE	1
@@ -53,5 +53,6 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/bin/dome
 %{prefix}/bin/dome_layout
 %{prefix}/bin/dome_struts
+%{prefix}/bin/dome_cover
 %{prefix}/bin/dome_3ds
 # %{prefix}/man/man1/xdraft.1
