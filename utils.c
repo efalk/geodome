@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: utils.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
+	"$Id: utils.c,v 1.2 2005/05/14 02:11:48 efalk Exp $" ;
 #endif
 
 /**********
@@ -255,6 +255,7 @@ get_color(int c)
 {
 	return colors[c % ncolors]->vals;
 }
+
 
 void
 assfail(const char *e, const char *file, int line)

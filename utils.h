@@ -1,7 +1,7 @@
 #ifndef	UTILS_H
 #define	UTILS_H
 
-/* $Id: utils.h,v 1.2 2004/11/12 23:56:48 efalk Rel $ */
+/* $Id: utils.h,v 1.3 2005/05/14 02:11:48 efalk Exp $ */
 
 typedef	struct {float x,y,z;} Point;
 
@@ -29,7 +29,7 @@ extern	void	crossprod(const Point *v1, const Point *v2, Point *out);
 extern	void	normcrossprod(const Point *v1, const Point *v2, Point *out);
 extern	double	dotprod(const Point *v1, const Point *v2);
 extern	void	parse_colors(char *clist);
-extern	const float *get_color(int c);
+extern	const	float *get_color(int c);
 
 #define	NA(array)	(sizeof(array)/sizeof(array[0]))
 #define	MIN(a,b)	((a)<(b)?(a):(b))
