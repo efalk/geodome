@@ -1,16 +1,16 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_cover.c,v 1.3 2005/05/15 17:37:16 efalk Exp $" ;
+	"$Id: dome_cover.c,v 1.4 2005/05/15 18:14:05 efalk Exp $" ;
 #endif
 
 /**********
  *
  *
- *	 @@@    @@@   @   @  @@@@@  @@@@   
- *	@      @   @  @   @  @      @   @  
- *	@      @   @  @   @  @@@    @@@@   
- *	@      @   @   @ @   @      @  @   
- *	 @@@    @@@     @    @@@@@  @   @  
+ *	 @@@    @@@   @   @  @@@@@  @@@@
+ *	@      @   @  @   @  @      @   @
+ *	@      @   @  @   @  @@@    @@@@
+ *	@      @   @   @ @   @      @  @
+ *	 @@@    @@@     @    @@@@@  @   @
  *
  *	DOME_COVER - Generate canvas layout and cutting list.
  *
@@ -267,10 +267,12 @@ main(int argc, char **argv)
 	{
 	  /* Draw strut list */
 	  float x,y;
-	  y = strut_page ? (hgt - tm) - textheight : (bm + hgt - wid) - textheight;
+	  y = strut_page ? (hgt - tm) - textheight :
+	  		   (bm + hgt - wid) - textheight;
 	  x = lm;
 	  fprintf(ofile, "%% strut list\nfixedFont setfont\n");
-	  fprintf(ofile, "%g %g moveto (%d faces total, %d different sizes) show\n",
+	  fprintf(ofile,
+	    "%g %g moveto (%d faces total, %d different sizes) show\n",
 	    x, y, ftotal, nf);
 	  y -= textheight*1.2*2;
 
@@ -328,19 +330,6 @@ main(int argc, char **argv)
 	}
 
 	write_trailer();
-
-
-#ifdef	COMMENT
-	fprintf(ofile,
-	  "\n\n\n"
-	  "Notes:\n\n"
-	  " length:      distance from vertex to vertex\n"
-	  " a0, a1:      bend angles at the two ends\n"
-	  " length2:     distance between bolt holes (accounts for bends)\n"
-	  " cut length:  total strut length, including margins\n"
-	  "\nDon't forget to make a few extras\n"
-	  );
-#endif	/* COMMENT */
 
 	exit(0);
 }
@@ -412,7 +401,9 @@ find_strut(const char *name)
 	int	i;
 	StrutInfo *rval;
 
-	for(rval=struts, i=0; strcmp(rval->name, name) != 0 && i < ns; ++i, ++rval);
+	for(rval=struts, i=0;
+	    strcmp(rval->name, name) != 0 && i < ns;
+	    ++i, ++rval);
 	return i < ns ? rval : NULL;
 }
 
@@ -439,7 +430,8 @@ compute_face(const Dome *dome, const int *face, FaceInfo *info)
 	if( (i = find_edge(face[0], face[1], dome)) < 0 ||
 	    (s0 = find_strut(dome->edges[i].name)) == NULL )
 	{
-	  fprintf(stderr, "internal error in compute_face, unable to find edge %d,%d\n",
+	  fprintf(stderr,
+	    "internal error in compute_face, unable to find edge %d,%d\n",
 	    face[0], face[1]);
 	  exit(4);
 	}
@@ -447,7 +439,8 @@ compute_face(const Dome *dome, const int *face, FaceInfo *info)
 	if( (i = find_edge(face[1], face[2], dome)) < 0 ||
 	    (s1 = find_strut(dome->edges[i].name)) == NULL )
 	{
-	  fprintf(stderr, "internal error in compute_face, unable to find edge %d,%d\n",
+	  fprintf(stderr,
+	    "internal error in compute_face, unable to find edge %d,%d\n",
 	    face[1], face[2]);
 	  exit(4);
 	}
@@ -455,7 +448,8 @@ compute_face(const Dome *dome, const int *face, FaceInfo *info)
 	if( (i = find_edge(face[2], face[0], dome)) < 0 ||
 	    (s2 = find_strut(dome->edges[i].name)) == NULL )
 	{
-	  fprintf(stderr, "internal error in compute_face, unable to find edge %d,%d\n",
+	  fprintf(stderr,
+	    "internal error in compute_face, unable to find edge %d,%d\n",
 	    face[2], face[0]);
 	  exit(4);
 	}
@@ -465,18 +459,21 @@ compute_face(const Dome *dome, const int *face, FaceInfo *info)
 	 * is repeated, prefer aab to aba
 	 */
 
-	if( strcmp(s1->name, s0->name) < 0 && strcmp(s1->name, s2->name) <= 0 ) {
+	if( strcmp(s1->name, s0->name) < 0 && strcmp(s1->name, s2->name) <= 0 )
+	{
 	  tmp = s0; s0 = s1; s1 = s2; s2 = tmp;
 	}
-	else if( strcmp(s2->name, s0->name) <= 0 && strcmp(s2->name, s1->name) < 0 ) {
+	else if( strcmp(s2->name, s0->name) <= 0 &&
+		 strcmp(s2->name, s1->name) < 0 ) {
 	  tmp = s0; s0 = s2; s2 = s1; s1 = tmp;
 	}
 
-	/* Make sure this face is counter-clockwise.  Take the cross-product of 1st two
-	 * edges and make sure vector faces out.  If not, swap 2nd two edges.
-	 * (This should never happen, as the dome software keeps faces in
-	 * counter-clockwise order anyway.)
+	/* Make sure this face is counter-clockwise.  Take the cross-product
+	 * of 1st two edges and make sure vector faces out.  If not, swap 2nd
+	 * two edges.  (This should never happen, as the dome software keeps
+	 * faces in counter-clockwise order anyway.)
 	 */
+
 	ptSub(&dome->vertices[face[0]], &dome->vertices[face[1]], &v1);
 	ptSub(&dome->vertices[face[1]], &dome->vertices[face[2]], &v2);
 	crossprod(&v1, &v2, &norm);
@@ -665,12 +662,14 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 	  const float *clr = get_color(c);
 	  fprintf(ofile, "%g %g %g setrgbcolor\n",
 	    (clr[0]+3)/4., (clr[1]+3)/4., (clr[2]+3)/4.);
-	  fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath fill\n",
+	  fprintf(ofile,
+	    "newpath %g %g moveto %g %g lineto %g %g lineto closepath fill\n",
 	    p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 	  fprintf(ofile, "0 setgray\n");
 	}
-	fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath stroke\n",
-	    p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+	fprintf(ofile,
+	  "newpath %g %g moveto %g %g lineto %g %g lineto closepath stroke\n",
+	  p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 
 	lx = (p0.x + p1.x + p2.x) / 3;
 	ly = (p0.y + p1.y + p2.y) / 3;
@@ -683,33 +682,39 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 	i = find_edge(dome->faces[face][0], dome->faces[face][1], dome);
 	lx = (p0.x*5 + p1.x*5 + p2.x) / 11;
 	ly = (p0.y*5 + p1.y*5 + p2.y) / 11;
-	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n", lx, ly, dome->edges[i].name);
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
+		lx, ly, dome->edges[i].name);
 
 	i = find_edge(dome->faces[face][1], dome->faces[face][2], dome);
 	lx = (p1.x*5 + p2.x*5 + p0.x) / 11;
 	ly = (p1.y*5 + p2.y*5 + p0.y) / 11;
-	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n", lx, ly, dome->edges[i].name);
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
+		lx, ly, dome->edges[i].name);
 
 	i = find_edge(dome->faces[face][2], dome->faces[face][0], dome);
 	lx = (p2.x*5 + p0.x*5 + p1.x) / 11;
 	ly = (p2.y*5 + p0.y*5 + p1.y) / 11;
-	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n", lx, ly, dome->edges[i].name);
+	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
+		lx, ly, dome->edges[i].name);
 
 #ifdef	COMMENT
 	i = find_edge(dome->faces[face][0], dome->faces[face][1], dome);
 	lx = (p0.x*5 + p1.x*5 + p2.x) / 11;
 	ly = (p0.y*5 + p1.y*5 + p2.y) / 11;
-	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n", lx, ly, dome->edges[i].len);
+	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n",
+		lx, ly, dome->edges[i].len);
 
 	i = find_edge(dome->faces[face][1], dome->faces[face][2], dome);
 	lx = (p1.x*5 + p2.x*5 + p0.x) / 11;
 	ly = (p1.y*5 + p2.y*5 + p0.y) / 11;
-	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n", lx, ly, dome->edges[i].len);
+	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n",
+		lx, ly, dome->edges[i].len);
 
 	i = find_edge(dome->faces[face][2], dome->faces[face][0], dome);
 	lx = (p2.x*5 + p0.x*5 + p1.x) / 11;
 	ly = (p2.y*5 + p0.y*5 + p1.y) / 11;
-	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n", lx, ly, dome->edges[i].len);
+	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n",
+		lx, ly, dome->edges[i].len);
 #endif	/* COMMENT */
 
 	fprintf(ofile, "\n");
@@ -737,12 +742,40 @@ adjust_face(Point *p0, Point *p1, Point *p2, Dome *dome, int face)
 
 
 static void
-draw_single_face(Dome *dome, FaceInfo *face, double x, double y, double w, double h)
+draw_single_face(Dome *dome, FaceInfo *face,
+	double x, double y, double w, double h)
 {
-	double	xs, ys;
-	double	maxlen;
-	double	A = face->s1->len, B = face->s2->len, C = face->s3->len;
-	double	x0,y0, x1,y1, x2,y2;
+	double		xs, ys;
+	double		maxlen;
+	StrutInfo	*s1, *s2, *s3;
+	double		A = face->s1->len, B = face->s2->len, C = face->s3->len;
+	double		x0,y0, x1,y1, x2,y2;
+
+	/* Pick an orientation.  If triangle is isosolese, put the two
+	 * matching sides on top.  Otherwise, put the longest side on
+	 * bottom.
+	 */
+
+	if( A == B ) {		/* C on bottom */
+	  s1 = face->s1; s2 = face->s2; s3 = face->s3;
+	}
+	else if( A == C ) {	/* B on bottom */
+	  s2 = face->s1; s3 = face->s2; s1 = face->s3;
+	}
+	else if( B == C ) {	/* A on bottom */
+	  s3 = face->s1; s1 = face->s2; s2 = face->s3;
+	}
+	else if( C > A && C > B ) {	/* C on bottom */
+	  s1 = face->s1; s2 = face->s2; s3 = face->s3;
+	}
+	else if( B > A && B > C ) {	/* B on bottom */
+	  s2 = face->s1; s3 = face->s2; s1 = face->s3;
+	}
+	else {				/* A on bottom */
+	  s3 = face->s1; s1 = face->s2; s2 = face->s3;
+	}
+
+	A = s1->len; B = s2->len; C = s3->len;
 
 	maxlen = max(A, B);
 	maxlen = max(maxlen, C);
@@ -768,29 +801,38 @@ draw_single_face(Dome *dome, FaceInfo *face, double x, double y, double w, doubl
 	  const float *clr = get_color(c);
 	  fprintf(ofile, "%g %g %g setrgbcolor\n",
 	    (clr[0]+3)/4., (clr[1]+3)/4., (clr[2]+3)/4.);
-	  fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath fill\n",
+	  fprintf(ofile,
+	    "newpath %g %g moveto %g %g lineto %g %g lineto closepath fill\n",
 	    x0*xs + x, y0*ys + y, x1*xs + x, y1*ys + y, x2*xs + x, y2*ys + y);
 	  fprintf(ofile, "0 setgray\n");
 	}
 
-	fprintf(ofile, "newpath %g %g moveto %g %g lineto %g %g lineto closepath stroke\n",
-	    x0*xs + x, y0*ys + y, x1*xs + x, y1*ys + y, x2*xs + x, y2*ys + y);
+	fprintf(ofile,
+	  "newpath %g %g moveto %g %g lineto %g %g lineto closepath stroke\n",
+	  x0*xs + x, y0*ys + y, x1*xs + x, y1*ys + y, x2*xs + x, y2*ys + y);
 
 	fprintf(ofile, "labelFont setfont\n");
 	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
 	  (x0+x1+x2)/3*xs + x, (y0+y1+y2)/3*ys + y, face->name);
 
 	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
-	  (x0+x2)/2*xs + x, (y0+y2)/2*ys + y, A*scale, face->s1->name);
+	  (x0+x2)/2*xs + x, (y0+y2)/2*ys + y, A*scale, s1->name);
 
 	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
-	  (x2+x1)/2*xs + x, (y2+y1)/2*ys + y, B*scale, face->s2->name);
+	  (x2+x1)/2*xs + x, (y2+y1)/2*ys + y, B*scale, s2->name);
 
 	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
-	  (x0+x1)/2*xs + x, (y0+y1)/2*ys + y, C*scale, face->s3->name);
+	  (x0+x1)/2*xs + x, (y0+y1)/2*ys + y, C*scale, s3->name);
 
 	fprintf(ofile, "%g %g moveto (Panel %s, make %d) ctrTxt\n",
 	  (x0+x1)/2*xs + x, -textheight*1.5 + y, face->name, face->count);
+
+	/* And now the height dimension */
+
+	fprintf(ofile, "newpath %g %g moveto %g %g lineto stroke\n",
+	  x1*xs+x+9, y1*ys+y, x1*xs+x+9, y2*ys+y);
+	fprintf(ofile, "%g %g moveto (%.2f) ctrTxt2\n",
+	  x1*xs+x+9, (y0+y2)/2*ys+y, (y2-y0)*scale);
 
 	fprintf(ofile, "\n");
 }
