@@ -1,4 +1,4 @@
-# $Id: geodome.spec,v 1.4 2005/05/15 18:14:05 efalk Exp $
+# $Id: geodome.spec,v 1.5 2005/05/15 20:05:24 efalk Exp $
 
 %define	ver	1.2
 %define	RELEASE	1
@@ -12,7 +12,7 @@ Release: %rel
 Group: Applications/Engineering
 URL: http://geodome.sourceforge.net
 Copyright: MIT
-Packager: Edward A. Falk <falk@sourceforge.net>
+Packager: Edward A. Falk <efalk@sourceforge.net>
 Source: http://geodome.sourceforge.net/geodome-%{PACKAGE_VERSION}.tar.gz
 Distribution: Redhat 7 and above.
 Buildroot: %{_tmppath}/%{name}-root

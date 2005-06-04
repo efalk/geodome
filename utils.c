@@ -1,15 +1,15 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: utils.c,v 1.2 2005/05/14 02:11:48 efalk Exp $" ;
+	"$Id: utils.c,v 1.3 2005/05/15 19:47:42 efalk Exp $" ;
 #endif
 
 /**********
  *
- *	@   @  @@@@@   @@@   @       @@@@  
- *	@   @    @      @    @      @      
- *	@   @    @      @    @       @@@   
- *	@   @    @      @    @          @  
- *	 @@@     @     @@@   @@@@@  @@@@   
+ *	@   @  @@@@@   @@@   @       @@@@
+ *	@   @    @      @    @      @
+ *	@   @    @      @    @       @@@
+ *	@   @    @      @    @          @
+ *	 @@@     @     @@@   @@@@@  @@@@
  *
  *	UTILS -- various small utilities.
  *

@@ -1,16 +1,16 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: main.c,v 1.2 2005/04/20 01:44:47 efalk Exp $";
+	"$Id: main.c,v 1.3 2005/05/14 02:11:48 efalk Exp $";
 #endif
 
 /**********
  *
  *
- *	 @@@@  @@@@@   @@@   @@@@    @@@   @   @  @@@@@  
- *	@      @      @   @  @   @  @   @  @@ @@  @      
- *	@ @@@  @@@    @   @  @   @  @   @  @ @ @  @@@    
- *	@   @  @      @   @  @   @  @   @  @ @ @  @      
- *	 @@@@  @@@@@   @@@   @@@@    @@@   @ @ @  @@@@@  
+ *	 @@@@  @@@@@   @@@   @@@@    @@@   @   @  @@@@@
+ *	@      @      @   @  @   @  @   @  @@ @@  @
+ *	@ @@@  @@@    @   @  @   @  @   @  @ @ @  @@@
+ *	@   @  @      @   @  @   @  @   @  @ @ @  @
+ *	 @@@@  @@@@@   @@@   @@@@    @@@   @ @ @  @@@@@
  *
  *
  *	This is the main program for the "dome" geodesic dome
@@ -759,7 +759,7 @@ drag(int x, int y)
 	  Point *vtx = &cdome.vertices[target_vertex];
 	  static Point c = {0,0,0};
 	  c.z = runMode == EXTEND ? vtx->z : 0.;
-	  projectPointOnLine(&c, &old_point, &old_point, .02 * (mx - x), vtx);
+	  projectPointOnLine(&c, &old_point, &old_point, .01 * (mx - x), vtx);
 	  sprintf(buffer, "R = %.2f", lenXY(vtx));
 	  glutSetWindowTitle(buffer);
 
@@ -827,7 +827,7 @@ reshape(int width, int height)
 /*---------------------------------------------------------------------------
  * Called when the drawing window becomes visible or invisible.
  */
-static void 
+static void
 visibleCB(int vis)
 {
 #ifdef	COMMENT

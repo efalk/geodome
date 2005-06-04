@@ -1,4 +1,4 @@
-	$Id: INSTRUCTIONS,v 1.2 2004/11/12 08:05:47 efalk Rel $
+	$Id: INSTRUCTIONS,v 1.3 2005/05/15 18:13:56 efalk Exp $
 
 Overview:
 
@@ -194,9 +194,10 @@ How to use the software:
     Use the dome_cover program to generate a diagram for a custom-fitted
     cover for your dome.  The program allows for the diameters of the
     pipes but does not allow for shrinkage of canvas.  It's best to
-    pre-shrink the material before cutting if applicable.  The program
-    also does not include seam allowances or make any attempt to decide for
-    you how to cut the panels.
+    pre-shrink the material before cutting if applicable.
+
+    The program also does not include seam allowances or make any attempt
+    to decide for you how to cut the panels.
 
     The program assumes the fabric has a right side and a wrong side.  Thus,
     you will often find panels which are mirror images of each other.

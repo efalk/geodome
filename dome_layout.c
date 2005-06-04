@@ -1,16 +1,16 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_layout.c,v 1.2 2004/11/12 08:08:02 efalk Exp $" ;
+	"$Id: dome_layout.c,v 1.3 2005/05/14 02:11:48 efalk Exp $" ;
 #endif
 
 /**********
  *
  *
- *	@       @@@   @   @   @@@   @   @  @@@@@  
- *	@      @   @   @ @   @   @  @   @    @    
- *	@      @@@@@    @    @   @  @   @    @    
- *	@      @   @    @    @   @  @   @    @    
- *	@@@@@  @   @    @     @@@    @@@     @    
+ *	@       @@@   @   @   @@@   @   @  @@@@@
+ *	@      @   @   @ @   @   @  @   @    @
+ *	@      @@@@@    @    @   @  @   @    @
+ *	@      @   @    @    @   @  @   @    @
+ *	@@@@@  @   @    @     @@@    @@@     @
  *
  *	DOME_LAYOUT - Generate postscript layout diagram
  *
