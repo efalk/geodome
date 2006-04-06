@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.3 2005/05/14 02:11:48 efalk Exp $
+#	$Id: Makefile,v 1.4 2005/05/15 18:13:56 efalk Exp $
 
 # Note: version number in Makefile, geodome.lsm, geodome.spec
 
@@ -20,7 +20,11 @@ DOC = AUTHORS INSTRUCTIONS README
 
 CFLAGS = $(OPT)
 
+# linux libs
 LIBS = -L/usr/X11R6/lib -lGL -lGLU -lglut -lXi -lXmu -lX11 -lm
+
+# cygwin libs
+#LIBS = -L/usr/X11R6/lib -lglut32 -lglu32 -lopengl32 -lm
 
 
 prefix = /usr/local
