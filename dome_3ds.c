@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_3ds.c,v 1.3 2004/11/12 08:08:02 efalk Exp $" ;
+	"$Id: dome_3ds.c,v 1.4 2005/06/04 07:53:53 efalk Exp $" ;
 #endif
 
 /**********
@@ -40,6 +40,8 @@ static const char usage[] =
 "	-ground		add ground\n"
 "	-noframe	do not include frame\n"
 "	-noshell	do not include shell\n"
+"	-nobg		no background\n"
+"	-bgwhite	white background\n"
 ;
 
 
@@ -77,6 +79,8 @@ static	int	ground = 0;
 static	int	add_floor = 0;
 static	int	no_frame = 0;
 static	int	no_shell = 0;
+static	int	bgwhite = 0;
+static	int	nobg = 0;
 
 
 static	void	write_dome_3ds(Dome *dome, const char *filename);
@@ -117,6 +121,10 @@ main(int argc, char **argv)
 	    no_frame = 1;
 	  else if( streq(*argv, "-noshell") )
 	    no_shell = 1;
+	  else if( streq(*argv, "-bgwhite") )
+	    bgwhite = 1;
+	  else if( streq(*argv, "-nobg") )
+	    nobg = 1;
 	  else if( ifilename == NULL )
 	    ifilename = *argv;
 	  else if( ofilename == NULL )
@@ -155,10 +163,19 @@ write_dome_3ds(Dome *dome, const char *filename)
 	strncpy(file->name, "OasisDome", sizeof(file->name));
 	file->master_scale = 1.;
 	file->ambient[0] = file->ambient[1] = file->ambient[2] = .5;
-	file->background.solid.use = 1;
-	file->background.solid.col[0] = .3;
-	file->background.solid.col[1] = .3;
-	file->background.solid.col[2] = .5;
+	if( !nobg ) {
+	  file->background.solid.use = 1;
+	  if( bgwhite ) {
+	    file->background.solid.col[0] =
+	    file->background.solid.col[1] =
+	    file->background.solid.col[2] = 1;
+	  }
+	  else {
+	    file->background.solid.col[0] = .3;
+	    file->background.solid.col[1] = .3;
+	    file->background.solid.col[2] = .5;
+	  }
+	}
 
 	if( cameras )
 	  add_cameras(dome, file);
