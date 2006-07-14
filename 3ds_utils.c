@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: 3ds_utils.c,v 1.1 2004/11/12 07:13:22 efalk Exp $";
+	"$Id: 3ds_utils.c,v 1.2 2005/04/30 16:47:08 efalk Exp $";
 #endif
 
 
@@ -20,10 +20,12 @@ static const char rcsid[] =
 
 #include "3ds_utils.h"
 
+#ifdef	COMMENT
 static Lib3dsMesh *full_rotation(Lib3dsMesh *, Point *, int,
 	int, const char *);
 static Lib3dsMesh *partial_rotation(Lib3dsMesh *, Point *, int,
 	double, double, int, const char *);
+#endif	/* COMMENT */
 
 
 /**
@@ -179,6 +181,7 @@ create_camera(Lib3dsFile *file, Lib3dsVector position, Lib3dsVector target,
 
 
 
+#ifdef	COMMENT
 /**
  * Generate a surface of rotation.  This is created by taking the specified
  * profile and rotating it about the Z axis.
@@ -375,3 +378,4 @@ full_rotation(Lib3dsMesh *mesh, Point *profile, int nprofile,
 
 	return mesh;
 }
+#endif	/* COMMENT */
