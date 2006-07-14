@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_struts.c,v 1.4 2005/05/14 02:11:48 efalk Exp $" ;
+	"$Id: dome_struts.c,v 1.5 2005/06/04 07:53:53 efalk Exp $" ;
 #endif
 
 /**********
@@ -87,6 +87,8 @@ main(int argc, char **argv)
 	  }
 	  else if( streq(*argv, "-margin") && --argc > 0)
 	    margin = atof(*++argv);
+	  else if( streq(*argv, "-bl") && --argc > 0)
+	    bl = atof(*++argv);
 	  else if( streq(*argv, "-at") && --argc > 0)
 	    at = atof(*++argv);
 	  else if( streq(*argv, "-lt") && --argc > 0)
