@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: main.c,v 1.3 2005/05/14 02:11:48 efalk Exp $";
+	"$Id: main.c,v 1.4 2005/06/04 07:53:53 efalk Exp $";
 #endif
 
 /**********
@@ -111,6 +111,7 @@ static	void	motion(int x, int y);
 static	void	reshape(int width, int height);
 static	void 	visibleCB(int vis);
 static	void	menuCB(int value);
+static	void	print_matrix(void);
 static	void	init();
 
 #ifdef	COMMENT
@@ -586,6 +587,7 @@ key(unsigned char k, int x, int y)
 	  case 'c': show_coords = !show_coords; break ;
 	  case 'n': normalize_start(); break;
 	  case 'N': normalize_now(); break;
+	  case 'm': print_matrix(); break;
 	  case 'l':
 	    level_bottom(&cdome);
 	    render_dome(&cdome);
@@ -839,4 +841,14 @@ visibleCB(int vis)
 	  set_running(0);
 
 	visible = vis;
+}
+
+
+/*---------------------------------------------------------------------------
+ * Print the current matrix.
+ */
+static void
+print_matrix(void)
+{
+	printf("print matrix\n");
 }
