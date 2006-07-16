@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.5 2006/04/06 21:26:09 efalk Exp $
+#	$Id: Makefile,v 1.6 2006/07/14 06:52:44 efalk Exp $
 
 # Note: version number in Makefile, geodome.lsm, geodome.spec
 
@@ -18,10 +18,13 @@ PGMS = dome dome_struts dome_cover dome_layout dome_3ds
 
 DOC = AUTHORS INSTRUCTIONS README
 
-CFLAGS = $(OPT)
+CFLAGS = $(OPT) -I/usr/include/GL -I/usr/include/GLUT
 
 # linux libs
 LIBS = -L/usr/X11R6/lib -lGL -lGLU -lglut -lXi -lXmu -lX11 -lm
+
+# Mac OSX libs
+#LIBS = -framework GLUT -framework OpenGL
 
 # cygwin libs
 #LIBS = -L/usr/X11R6/lib -lglut32 -lglu32 -lopengl32 -lm

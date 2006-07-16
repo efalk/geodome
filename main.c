@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: main.c,v 1.4 2005/06/04 07:53:53 efalk Exp $";
+	"$Id: main.c,v 1.5 2006/07/14 06:51:07 efalk Exp $";
 #endif
 
 /**********
@@ -52,7 +52,7 @@ static const char usage[] =
 #include <sys/mman.h>
 #include <fcntl.h>
 
-#include <GL/glut.h>
+#include <glut.h>
 
 #include "utils.h"
 #include "dome.h"

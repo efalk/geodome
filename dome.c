@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id$" ;
+	"$Id: dome.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
 #endif
 
 /**********
@@ -63,7 +63,7 @@ static const char rcsid[] =
 #include <math.h>
 #include <sys/types.h>
 
-#include <GL/glut.h>
+#include <glut.h>
 
 #include "utils.h"
 #include "dome.h"
