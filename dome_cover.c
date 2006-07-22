@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_cover.c,v 1.4 2005/05/15 18:14:05 efalk Exp $" ;
+	"$Id: dome_cover.c,v 1.5 2005/06/04 07:53:25 efalk Exp $" ;
 #endif
 
 /**********
@@ -789,10 +789,13 @@ draw_single_face(Dome *dome, FaceInfo *face,
 
 	y += textheight * 2;
 
+	/* P0 = lower-left, P1 = lower-right, P2 = top.
+	 * C = P0-P1, 
+	 */
 	x0 = 0; y0 = 0;
 	x1 = C; y1 = 0;
-	x2 = (A*A - B*B + C*C)/(2*C);
-	y2 = sqrt(A*A - x2*x2);
+	x2 = (B*B - A*A + C*C)/(2*C);
+	y2 = sqrt(B*B - x2*x2);
 
 	fprintf(ofile, "%% face %s\n", face->name);
 
@@ -816,10 +819,10 @@ draw_single_face(Dome *dome, FaceInfo *face,
 	  (x0+x1+x2)/3*xs + x, (y0+y1+y2)/3*ys + y, face->name);
 
 	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
-	  (x0+x2)/2*xs + x, (y0+y2)/2*ys + y, A*scale, s1->name);
+	  (x0+x2)/2*xs + x, (y0+y2)/2*ys + y, B*scale, s2->name);
 
 	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
-	  (x2+x1)/2*xs + x, (y2+y1)/2*ys + y, B*scale, s2->name);
+	  (x2+x1)/2*xs + x, (y2+y1)/2*ys + y, A*scale, s1->name);
 
 	fprintf(ofile, "%g %g moveto (%.2f (%s)) ctrTxt2\n",
 	  (x0+x1)/2*xs + x, (y0+y1)/2*ys + y, C*scale, s3->name);
