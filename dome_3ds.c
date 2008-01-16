@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_3ds.c,v 1.4 2005/06/04 07:53:53 efalk Exp $" ;
+	"$Id: dome_3ds.c,v 1.5 2006/07/14 06:49:34 efalk Exp $" ;
 #endif
 
 /**********
@@ -40,6 +40,7 @@ static const char usage[] =
 "	-ground		add ground\n"
 "	-noframe	do not include frame\n"
 "	-noshell	do not include shell\n"
+"	-scale x	scale all values; e.g. 12 converts feet => inches\n"
 "	-nobg		no background\n"
 "	-bgwhite	white background\n"
 ;
@@ -79,6 +80,7 @@ static	int	ground = 0;
 static	int	add_floor = 0;
 static	int	no_frame = 0;
 static	int	no_shell = 0;
+static	float	scale = 1.;
 static	int	bgwhite = 0;
 static	int	nobg = 0;
 
@@ -121,6 +123,8 @@ main(int argc, char **argv)
 	    no_frame = 1;
 	  else if( streq(*argv, "-noshell") )
 	    no_shell = 1;
+	  else if( streq(*argv, "-scale") && --argc > 0)
+	    scale = atof(*++argv);
 	  else if( streq(*argv, "-bgwhite") )
 	    bgwhite = 1;
 	  else if( streq(*argv, "-nobg") )
@@ -161,7 +165,7 @@ write_dome_3ds(Dome *dome, const char *filename)
 	file = lib3ds_file_new();
 
 	strncpy(file->name, "OasisDome", sizeof(file->name));
-	file->master_scale = 1.;
+	file->master_scale = scale;
 	file->ambient[0] = file->ambient[1] = file->ambient[2] = .5;
 	if( !nobg ) {
 	  file->background.solid.use = 1;
