@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: utils.c,v 1.3 2005/05/15 19:47:42 efalk Exp $" ;
+	"$Id: utils.c,v 1.4 2005/06/04 07:53:53 efalk Exp $" ;
 #endif
 
 /**********
@@ -48,7 +48,7 @@ ptAdd(const Point *a, const Point *b, Point *out)
 
 
 /**
- * Subtract two 3-d points.
+ * Subtract two 3-d points.  out = a - b
  */
 void
 ptSub(const Point *a, const Point *b, Point *out)

@@ -1,7 +1,7 @@
 #ifndef	DOME_H
 #define	DOME_H
 
-/* $Id: dome.h,v 1.4 2005/05/14 02:11:48 efalk Exp $ */
+/* $Id: dome.h,v 1.5 2008/01/18 01:47:56 efalk Exp $ */
 
 #define	EDGE_BASE	5000
 #define	VTX_BASE	10000
@@ -13,7 +13,7 @@ typedef	struct	{
 	} Edge;
 
 typedef	struct	{
-	  int	v0,v1,v2;
+	  int	v0,v1,v2;	/* vertices */
 	} Face;
 
 typedef struct {

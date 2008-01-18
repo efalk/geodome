@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_math.c,v 1.5 2005/06/04 07:53:53 efalk Exp $" ;
+	"$Id: dome_math.c,v 1.6 2008/01/18 01:47:57 efalk Exp $" ;
 #endif
 
 /**********
@@ -283,7 +283,6 @@ tesselate(const Dome *in, Dome *out, int f)
 }
 
 
-
 /**
  * Tesselate one triangle
  */
@@ -298,10 +297,16 @@ tesselate1(const Dome *in, Face *face, int f, Dome *out,
 	double	frac = 1./f;
 	Point	v01f, v02f, v12f;
 
+        /* The edges are subdivided, yielding points we may already have.
+         * More points are created in the interior, and these are guaranteed
+         * unique.
+         */
+
 	p0 = &in->vertices[face->v0];
 	p1 = &in->vertices[face->v1];
 	p2 = &in->vertices[face->v2];
 
+	/* Get vectors representing edges */
 	ptSub(p1, p0, &v01);
 	ptSub(p2, p0, &v02);
 	ptSub(p2, p1, &v12);
@@ -637,7 +642,7 @@ delete_vertex(Dome *dome, int vertex)
 
 
 /**
- * Build a vertex list from a dome.  Input vertex array must be of same
+ * Build a vertex list from a dome.  "vertices" array must be of same
  * length as dome's vertex list.
  */
 void
