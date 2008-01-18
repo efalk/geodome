@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_cover.c,v 1.5 2005/06/04 07:53:25 efalk Exp $" ;
+	"$Id: dome_cover.c,v 1.6 2006/07/22 19:50:49 efalk Exp $" ;
 #endif
 
 /**********
@@ -85,7 +85,7 @@ typedef	struct {
 
 
 static	int	assign_faces(const Dome *dome, FaceInfo **info, double lt);
-static	void	compute_face(const Dome *dome, const int *face, FaceInfo *info);
+static	void	compute_face(const Dome *dome, Face *face, FaceInfo *info);
 static	int	match_face(const FaceInfo *a, const FaceInfo *b);
 static	int	facesort(const void *aa, const void *bb);
 static	FaceInfo *findFace(FaceInfo *list, int, const Dome *, int face);
@@ -365,7 +365,7 @@ assign_faces(const Dome *dome, FaceInfo **info, double lt)
 	for(i=0, face = dome->faces; i < dome->nface; ++i, ++face)
 	{
 	  FaceInfo tmp;
-	  compute_face(dome, (int *)face, &tmp);
+	  compute_face(dome, face, &tmp);
 	  tmp.count = 1;
 
 	  for(j=0; j < ninfo && !match_face(&rval[j], &tmp); ++j);
@@ -417,7 +417,7 @@ find_strut(const char *name)
  * \param info  info structure to fill in
  */
 static void
-compute_face(const Dome *dome, const int *face, FaceInfo *info)
+compute_face(const Dome *dome, Face *face, FaceInfo *info)
 {
 	StrutInfo *s0, *s1, *s2, *tmp;
 	Point	v1, v2, norm;
@@ -427,30 +427,30 @@ compute_face(const Dome *dome, const int *face, FaceInfo *info)
 	 * looking up the label in the strut list.
 	 */
 
-	if( (i = find_edge(face[0], face[1], dome)) < 0 ||
+	if( (i = find_edge(face->v0, face->v1, dome)) < 0 ||
 	    (s0 = find_strut(dome->edges[i].name)) == NULL )
 	{
 	  fprintf(stderr,
 	    "internal error in compute_face, unable to find edge %d,%d\n",
-	    face[0], face[1]);
+	    face->v0, face->v1);
 	  exit(4);
 	}
 
-	if( (i = find_edge(face[1], face[2], dome)) < 0 ||
+	if( (i = find_edge(face->v1, face->v2, dome)) < 0 ||
 	    (s1 = find_strut(dome->edges[i].name)) == NULL )
 	{
 	  fprintf(stderr,
 	    "internal error in compute_face, unable to find edge %d,%d\n",
-	    face[1], face[2]);
+	    face->v1, face->v2);
 	  exit(4);
 	}
 
-	if( (i = find_edge(face[2], face[0], dome)) < 0 ||
+	if( (i = find_edge(face->v2, face->v0, dome)) < 0 ||
 	    (s2 = find_strut(dome->edges[i].name)) == NULL )
 	{
 	  fprintf(stderr,
 	    "internal error in compute_face, unable to find edge %d,%d\n",
-	    face[2], face[0]);
+	    face->v2, face->v0);
 	  exit(4);
 	}
 
@@ -474,10 +474,10 @@ compute_face(const Dome *dome, const int *face, FaceInfo *info)
 	 * faces in counter-clockwise order anyway.)
 	 */
 
-	ptSub(&dome->vertices[face[0]], &dome->vertices[face[1]], &v1);
-	ptSub(&dome->vertices[face[1]], &dome->vertices[face[2]], &v2);
+	ptSub(&dome->vertices[face->v0], &dome->vertices[face->v1], &v1);
+	ptSub(&dome->vertices[face->v1], &dome->vertices[face->v2], &v2);
 	crossprod(&v1, &v2, &norm);
-	if( dotprod(&norm, &dome->vertices[face[0]]) < 0. ) {
+	if( dotprod(&norm, &dome->vertices[face->v0]) < 0. ) {
 	  tmp = s1; s1 = s2; s2 = tmp;
 	}
 
@@ -513,7 +513,7 @@ findFace(FaceInfo *list, int n, const Dome *dome, int face)
 	int	i;
 	FaceInfo tmp;
 
-	compute_face(dome, dome->faces[face], &tmp);
+	compute_face(dome, &dome->faces[face], &tmp);
 
 	for(i=0; i < n && !match_face(&list[i], &tmp); ++i);
 	if( i < n )
@@ -629,14 +629,14 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 
 	if( info == NULL ) {
 	  fprintf(stderr, "face not found in draw_face\n");
-	  compute_face(dome, dome->faces[face], &tmp);
+	  compute_face(dome, &dome->faces[face], &tmp);
 	  info = &tmp;
 	  tmp.name = "x";
 	}
 
-	p0 = dome->vertices[dome->faces[face][0]];
-	p1 = dome->vertices[dome->faces[face][1]];
-	p2 = dome->vertices[dome->faces[face][2]];
+	p0 = dome->vertices[dome->faces[face].v0];
+	p1 = dome->vertices[dome->faces[face].v1];
+	p2 = dome->vertices[dome->faces[face].v2];
 
 	project_point(&p0);
 	project_point(&p1);
@@ -679,19 +679,19 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 	/* Now label the edges.  We need to identify them first. */
 	fprintf(ofile, "edgeFont setfont\n");
 
-	i = find_edge(dome->faces[face][0], dome->faces[face][1], dome);
+	i = find_edge(dome->faces[face].v0, dome->faces[face].v1, dome);
 	lx = (p0.x*5 + p1.x*5 + p2.x) / 11;
 	ly = (p0.y*5 + p1.y*5 + p2.y) / 11;
 	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
 		lx, ly, dome->edges[i].name);
 
-	i = find_edge(dome->faces[face][1], dome->faces[face][2], dome);
+	i = find_edge(dome->faces[face].v1, dome->faces[face].v2, dome);
 	lx = (p1.x*5 + p2.x*5 + p0.x) / 11;
 	ly = (p1.y*5 + p2.y*5 + p0.y) / 11;
 	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
 		lx, ly, dome->edges[i].name);
 
-	i = find_edge(dome->faces[face][2], dome->faces[face][0], dome);
+	i = find_edge(dome->faces[face].v2, dome->faces[face].v0, dome);
 	lx = (p2.x*5 + p0.x*5 + p1.x) / 11;
 	ly = (p2.y*5 + p0.y*5 + p1.y) / 11;
 	fprintf(ofile, "%g %g moveto (%s) ctrTxt\n",
@@ -710,7 +710,7 @@ draw_face(Dome *dome, int face, FaceInfo *facelist, int nf)
 	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n",
 		lx, ly, dome->edges[i].len);
 
-	i = find_edge(dome->faces[face][2], dome->faces[face][0], dome);
+	i = find_edge(dome->faces[face].v2, dome->faces[face].v0, dome);
 	lx = (p2.x*5 + p0.x*5 + p1.x) / 11;
 	ly = (p2.y*5 + p0.y*5 + p1.y) / 11;
 	fprintf(ofile, "%g %g moveto (%.2g) ctrTxt\n",

@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_math.c,v 1.4 2005/05/14 02:11:48 efalk Exp $" ;
+	"$Id: dome_math.c,v 1.5 2005/06/04 07:53:53 efalk Exp $" ;
 #endif
 
 /**********
@@ -38,7 +38,7 @@ static const char rcsid[] =
 
 
 
-static	void	tesselate1(const Dome *in, Face face, int f, Dome *out,
+static	void	tesselate1(const Dome *in, Face *face, int f, Dome *out,
 			int *fcount, int *vcount, int *ecount);
 static	void	add_face(Point *p0, Point *p1, Point *p2, Dome *dome,
 			int *nf, int *ne, int *nv);
@@ -275,7 +275,7 @@ tesselate(const Dome *in, Dome *out, int f)
 
 
 	for(i = 0; i < in->nface; ++i)
-	  tesselate1(in, in->faces[i], f, out, &fcount, &vcount, &ecount);
+	  tesselate1(in, &in->faces[i], f, out, &fcount, &vcount, &ecount);
 
 	out->nface = fcount;
 	out->nedge = ecount;
@@ -288,7 +288,7 @@ tesselate(const Dome *in, Dome *out, int f)
  * Tesselate one triangle
  */
 static	void
-tesselate1(const Dome *in, Face face, int f, Dome *out,
+tesselate1(const Dome *in, Face *face, int f, Dome *out,
 	int *fcount, int *vcount, int *ecount)
 {
 	int	i,j;
@@ -298,9 +298,9 @@ tesselate1(const Dome *in, Face face, int f, Dome *out,
 	double	frac = 1./f;
 	Point	v01f, v02f, v12f;
 
-	p0 = &in->vertices[face[0]];
-	p1 = &in->vertices[face[1]];
-	p2 = &in->vertices[face[2]];
+	p0 = &in->vertices[face->v0];
+	p1 = &in->vertices[face->v1];
+	p2 = &in->vertices[face->v2];
 
 	ptSub(p1, p0, &v01);
 	ptSub(p2, p0, &v02);
@@ -362,9 +362,9 @@ add_face(Point *p0, Point *p1, Point *p2, Dome *dome,
 	v0 = match_vtx(p0, dome, nv);
 	v1 = match_vtx(p1, dome, nv);
 	v2 = match_vtx(p2, dome, nv);
-	dome->faces[*nf][0] = v0;
-	dome->faces[*nf][1] = v1;
-	dome->faces[*nf][2] = v2;
+	dome->faces[*nf].v0 = v0;
+	dome->faces[*nf].v1 = v1;
+	dome->faces[*nf].v2 = v2;
 	++(*nf);
 
 	(void) match_edge(v0, v1, dome, ne);
@@ -598,8 +598,7 @@ delete_vertex(Dome *dome, int vertex)
 	face = dome->faces + dome->nface - 1;
 	for(i=dome->nface - 1; i >= 0; --i, --face)
 	{
-	  if( (*face)[0] == vertex || (*face)[1] == vertex ||
-	      (*face)[2] == vertex )
+	  if( face->v0 == vertex || face->v1 == vertex || face->v2 == vertex )
 	    delete_face(dome, i);
 	}
 
@@ -617,9 +616,9 @@ delete_vertex(Dome *dome, int vertex)
 
 	for(i=0, face = dome->faces; i < dome->nface; ++i, ++face)
 	{
-	  if( face[0][0] > vertex ) --face[0][0];
-	  if( face[0][1] > vertex ) --face[0][1];
-	  if( face[0][2] > vertex ) --face[0][2];
+	  if( face->v0 > vertex ) --face->v0;
+	  if( face->v1 > vertex ) --face->v1;
+	  if( face->v2 > vertex ) --face->v2;
 	}
 
 	for(i=0, edge = dome->edges; i < dome->nedge; ++i, ++edge)

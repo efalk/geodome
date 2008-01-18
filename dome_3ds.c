@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_3ds.c,v 1.5 2006/07/14 06:49:34 efalk Exp $" ;
+	"$Id: dome_3ds.c,v 1.6 2008/01/16 00:51:17 efalk Exp $" ;
 #endif
 
 /**********
@@ -244,9 +244,9 @@ add_faces(Dome *dome, Lib3dsFile *file)
 
 	for(i=0; i < dome->nface; ++i) {
 	  strncpy(faces[i].material, "canvas", sizeof(faces[i].material));
-	  faces[i].points[0] = dome->faces[i][0];
-	  faces[i].points[1] = dome->faces[i][1];
-	  faces[i].points[2] = dome->faces[i][2];
+	  faces[i].points[0] = dome->faces[i].v0;
+	  faces[i].points[1] = dome->faces[i].v1;
+	  faces[i].points[2] = dome->faces[i].v2;
 	}
 
 	lib3ds_file_insert_mesh(file, mesh);

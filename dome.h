@@ -1,18 +1,20 @@
 #ifndef	DOME_H
 #define	DOME_H
 
-/* $Id: dome.h,v 1.3 2004/11/12 23:56:48 efalk Rel $ */
+/* $Id: dome.h,v 1.4 2005/05/14 02:11:48 efalk Exp $ */
 
 #define	EDGE_BASE	5000
 #define	VTX_BASE	10000
-
-typedef	int	Face[3];
 
 typedef	struct	{
 	  int v0, v1;
 	  double len;
 	  char *name;
 	} Edge;
+
+typedef	struct	{
+	  int	v0,v1,v2;
+	} Face;
 
 typedef struct {
 	  int	vtx;

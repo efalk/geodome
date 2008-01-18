@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome.c,v 1.1 2004/11/12 07:13:22 efalk Exp $" ;
+	"$Id: dome.c,v 1.2 2006/07/16 00:38:41 efalk Exp $" ;
 #endif
 
 /**********
@@ -245,9 +245,9 @@ draw_face(Dome *dome, Face *face)
 	Point	*pts = dome->vertices;
 
 	Point d1, d2, norm;
-	Point	*p0 = pts + (*face)[0];
-	Point	*p1 = pts + (*face)[1];
-	Point	*p2 = pts + (*face)[2];
+	Point	*p0 = pts + face->v0;
+	Point	*p1 = pts + face->v1;
+	Point	*p2 = pts + face->v2;
 	ptSub(p1, p0, &d1);
 	ptSub(p2, p0, &d2);
 	normcrossprod(&d1, &d2, &norm);
