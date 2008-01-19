@@ -1,7 +1,7 @@
 #ifndef	DOME_H
 #define	DOME_H
 
-/* $Id: dome.h,v 1.5 2008/01/18 01:47:56 efalk Exp $ */
+/* $Id: dome.h,v 1.6 2008/01/18 03:01:53 efalk Exp $ */
 
 #define	EDGE_BASE	5000
 #define	VTX_BASE	10000
@@ -88,6 +88,7 @@ extern	void	level_bottom2(Dome *dome);
 extern	int	assign_labels(Dome *dome, StrutInfo **, double, double);
 extern	void	project_point(Point *p);
 extern	int	find_edge(int v0, int v1, const Dome *dome);
+extern	int	find_edge2(int v0, int v1, const Dome *dome, int ne);
 extern	int	match_edge(int v0, int v1, const Dome *dome, int *ne);
 
 extern	double	dome_max(Dome *dome);

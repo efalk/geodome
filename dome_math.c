@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: dome_math.c,v 1.6 2008/01/18 01:47:57 efalk Exp $" ;
+	"$Id: dome_math.c,v 1.7 2008/01/18 03:01:53 efalk Exp $" ;
 #endif
 
 /**********
@@ -280,6 +280,17 @@ tesselate(const Dome *in, Dome *out, int f)
 	out->nface = fcount;
 	out->nedge = ecount;
 	out->nvert = vcount;
+
+#ifdef	COMMENT
+	printf("done, nvert = %d, nedge = %d\n", out->nvert, out->nedge);
+	printf("vertex 0 = (%.2f,%.2f,%.2f)\n",
+	  out->vertices[0].x, out->vertices[0].y, out->vertices[0].z);
+	printf("edges touching vertex 0:\n");
+	for(i=0; i < out->nedge; ++i) {
+	  if( out->edges[i].v0 == 0 || out->edges[i].v1 == 0 )
+	    printf("%d: %d-%d\n", i, out->edges[i].v0, out->edges[i].v1);
+	}
+#endif	/* COMMENT */
 }
 
 
@@ -411,9 +422,22 @@ match_vtx(Point *vtx, Dome *dome, int *nv)
 int
 find_edge(int v0, int v1, const Dome *dome)
 {
+	return find_edge2(v0, v1, dome, dome->nedge);
+}
+
+
+/**
+ * Same as find_edge(), but only search a limited number of edges.
+ *
+ * \param v0, v1  vertices to match
+ * \param dome    dome containing vertices and edges
+ */
+int
+find_edge2(int v0, int v1, const Dome *dome, int ne)
+{
 	int	i;
 
-	for(i=0; i < dome->nedge; ++i)
+	for(i=0; i < ne; ++i)
 	  if( (dome->edges[i].v0 == v0 && dome->edges[i].v1 == v1)  ||
 	      (dome->edges[i].v1 == v0 && dome->edges[i].v0 == v1) )
 	    return i;
@@ -434,8 +458,9 @@ match_edge(int v0, int v1, const Dome *dome, int *ne)
 {
 	int	i;
 
-	if( (i = find_edge(v0, v1, dome)) >= 0 )
+	if( (i = find_edge2(v0, v1, dome, *ne)) >= 0 ) {
 	  return i;
+	}
 
 	if( *ne >= dome->nedge ) {
 	  fprintf(stderr, "Internal error: out of edges in match_edge\n");

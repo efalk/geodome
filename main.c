@@ -1,6 +1,6 @@
 #ifndef lint
 static const char rcsid[] =
-	"$Id: main.c,v 1.5 2006/07/14 06:51:07 efalk Exp $";
+	"$Id: main.c,v 1.6 2006/07/16 00:38:41 efalk Exp $";
 #endif
 
 /**********
@@ -138,6 +138,11 @@ main(int argc, char *argv[])
 	  }
 	  else if( streq(*argv, "-radius") && --argc > 0)
 	    radius = atof(*++argv);
+	  else if( **argv == '-' ) {
+	    fprintf(stderr, "%s unrecognized\n", *argv);
+	    fprintf(stderr, usage);
+	    exit(2);
+	  }
 	  else if( ifilename == NULL )
 	    ifilename = *argv;
 	}
