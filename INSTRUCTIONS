@@ -1,4 +1,4 @@
-	$Id: INSTRUCTIONS,v 1.3 2005/05/15 18:13:56 efalk Exp $
+	$Id: INSTRUCTIONS,v 1.4 2005/06/04 07:53:53 efalk Exp $
 
 Overview:
 
@@ -52,6 +52,27 @@ Commands:
 
 
 How to use the software:
+
+  Linux users:
+
+    The dome, dome_struts, and so forth commands should be in your path, so
+    it's sufficient to just type e.g. 'dome -radius 15' to run the program.
+
+  Mac users:
+
+    The interface is a little deceptive.  You can't just double-click on the
+    icons to run the programs, because the programs want arguments on the
+    command line.
+    
+    Instead, you bring up a command window and type the full path of the
+    program, e.g.:
+
+      '/Applications/geodome 1.2/dome' -radius 15
+
+    (you need the quotes because of the space in the program name).
+
+    I'll try to clean this up for the next release.
+
 
   Dome:
 
