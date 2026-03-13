@@ -14,6 +14,11 @@ Commands:
     on the current mode (initial mode is rotation).  The middle button
     always rotates.
 
+    Additionally, some windowing systems mandate a toolbar menu be
+    present. Because falkdome makes no use of this feature, a default
+    is provided by the GLUT system, which is of little use beyond
+    saving a screenshot in tiff format.
+
     Keyboard commands:
 
       esc	exit
@@ -55,8 +60,9 @@ How to use the software:
 
   Linux users:
 
-    The dome, dome_struts, and so forth commands should be in your path, so
-    it's sufficient to just type e.g. 'dome -radius 15' to run the program.
+    The falkdome, falkstruts, and so forth commands should be in your
+    path, so it's sufficient to just type e.g. 'falkdome -radius 15'
+    to run the program.
 
   Mac users:
 
@@ -125,7 +131,7 @@ How to use the software:
 
   Strut list:
 
-    Use the dome_struts program to generate a cutting and bending list
+    Use the falkstruts program to generate a cutting and bending list
     for the struts.
 
     "falkstruts --help" for arguments.
@@ -184,7 +190,7 @@ How to use the software:
 
   Assembly diagram:
 
-    Use the dome_layout program to generate an assembly diagram.  This
+    Use the falklayout program to generate an assembly diagram.  This
     program generates a postscript file.
 
     "falklayout --help" for options.
@@ -210,7 +216,7 @@ How to use the software:
 
   Cover diagram:
 
-    Use the dome_cover program to generate a diagram for a custom-fitted
+    Use the falkcover program to generate a diagram for a custom-fitted
     cover for your dome.  The program allows for the diameters of the
     pipes but does not allow for shrinkage of canvas.  It's best to
     pre-shrink the material before cutting if applicable.
@@ -237,7 +243,7 @@ How to use the software:
 
       Each panel is shown with a panel name in the center, and edge names in
       small print near the edges.  The edge names should match those generated
-      by dome_struts.
+      by falkstruts.
 
       Next, is a list of all the different panel sizes along with the lengths
       of their edges.
