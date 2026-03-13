@@ -1,6 +1,8 @@
-#	$Id: Makefile,v 1.6 2006/07/14 06:52:44 efalk Exp $
+#	$Id: Makefile,v 1.7 2006/07/16 00:38:41 efalk Exp $
 
 # Note: version number in Makefile, geodome.lsm, geodome.spec
+
+PGMNAME=falkdome
 
 VERSION = 1.3
 
@@ -8,23 +10,25 @@ VERSION = 1.3
 OPT = -O
 
 #LDFLAGS = -g
-LDFLAGS = -s
+LDFLAGS = #-s
 
+GLINC=/opt/X11/include/GL
+GLUTINC=/opt/X11/include
 
 # Probably no need to edit anything below this line.
 
-
-PGMS = dome dome_struts dome_cover dome_layout dome_3ds
+PGMS = falkdome falkstruts falkcover falklayout falk3ds icosahedron
 
 DOC = AUTHORS INSTRUCTIONS README
 
-CFLAGS = $(OPT) -I/usr/include/GL -I/usr/include/GLUT
+#CFLAGS = $(OPT) -I/usr/include/GL -I/usr/include/GLUT
+CFLAGS = $(OPT) -I$(GLINC) -I$(GLUTINC)
 
 # linux libs
-LIBS = -L/usr/X11R6/lib -lGL -lGLU -lglut -lXi -lXmu -lX11 -lm
+#LIBS = -L/usr/X11R6/lib -lGL -lGLU -lglut -lXi -lXmu -lX11 -lm
 
 # Mac OSX libs
-#LIBS = -framework GLUT -framework OpenGL
+LIBS = -framework GLUT -framework OpenGL
 
 # cygwin libs
 #LIBS = -L/usr/X11R6/lib -lglut32 -lglu32 -lopengl32 -lm
@@ -32,7 +36,7 @@ LIBS = -L/usr/X11R6/lib -lGL -lGLU -lglut -lXi -lXmu -lX11 -lm
 
 prefix = /usr/local
 bindir = $(prefix)/bin
-docdir = $(prefix)/doc/geodome-$(VERSION)
+docdir = $(prefix)/doc/$(PGMNAME)-$(VERSION)
 mandir = $(prefix)/man
 man1dir = $(prefix)/man1
 
@@ -63,19 +67,19 @@ ALL_SRCS = 3ds_utils.c dome_3ds.c dome.c dome_file.c dome_layout.c \
 
 
 
-dome:	$(DOME_OBJS)
+falkdome:	$(DOME_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(DOME_OBJS) $(LIBS)
 
-dome_struts: $(DOME_STRUTS_OBJS)
+falkstruts: $(DOME_STRUTS_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(DOME_STRUTS_OBJS) -lm
 
-dome_cover: $(DOME_COVER_OBJS)
+falkcover: $(DOME_COVER_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(DOME_COVER_OBJS) -lm
 
-dome_layout: $(DOME_LAYOUT_OBJS)
+falklayout: $(DOME_LAYOUT_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(DOME_LAYOUT_OBJS) -lm
 
-dome_3ds: $(DOME_3DS_OBJS)
+falk3ds: $(DOME_3DS_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(DOME_3DS_OBJS) -l3ds -lm
 
 icosahedron: icosahedron.o
@@ -90,14 +94,14 @@ $(bindir) $(docdir):
 
 
 tags:	$(ALL_SRCS) $(HDRS)
-	ctags *.[ch] /usr/include/GL/*.h ../../Lib3ds/lib3ds/*.[ch]
+	ctags *.[ch] $(GLINC)/*.h ../../Lib3ds/lib3ds/*.[ch]
 
 
 # Build the tarball
 
-DIST_NAME = geodome-$(VERSION)
+DIST_NAME = $(PGMNAME)-$(VERSION)
 DIST_DIR = /tmp/$(DIST_NAME)
-DIST_FILES = Makefile geodome.spec geodome.lsm $(DOC) $(HDRS) $(ALL_SRCS)
+DIST_FILES = Makefile $(PGMNAME).spec $(PGMNAME).lsm $(DOC) $(HDRS) $(ALL_SRCS)
 
 dist: clobber $(DIST_FILES)
 	rm -rf $(DIST_DIR)
@@ -124,12 +128,12 @@ rpm: $(DIST_NAME).tar.gz
 	mkdir -p $(RPM_BUILD_DIR)
 	cp $(DIST_NAME).tar.gz $(RPM_SOURCE_DIR)
 
-	rpmbuild -bb geodome.spec \
+	rpmbuild -bb $(PGMNAME).spec \
 	  --define "_sourcedir ${RPM_SOURCE_DIR}" \
 	  --define "_builddir ${RPM_BUILD_DIR}" \
 	  --define "_rpmdir ${RPM_SOURCE_DIR}"
 
-	mv ${RPM_SOURCE_DIR}/i386/geodome-*.rpm .
+	mv ${RPM_SOURCE_DIR}/i386/$(PGMNAME)-*.rpm .
 	rm -rf ${RPM_SOURCE_DIR} ${RPM_BUILD_DIR}
 
 
