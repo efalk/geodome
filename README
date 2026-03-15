@@ -36,9 +36,10 @@ HOW TO BUILD
     Makefile as necessary and type "make", or "make install" to put the
     binaries into /usr/local.
 
-    falk3ds requires lib3ds, which is also available on github.
-    Once this is installed, modify Makefile as necessary and type "make",
-    or "make install" to put the binaries into /usr/local.
+    falk3ds requires a special version of lib3ds, which is also
+    available on <github.com/blubaron/lib3ds>. Once this is installed,
+    modify the falkdome Makefile as necessary and type "make", and
+    "make install" to put the binaries into /usr/local.
 
     falkstruts, falklayout, and falkcover do not require any
     special libraries.
